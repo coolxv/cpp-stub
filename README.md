@@ -5,11 +5,11 @@ c++单元测试打桩接口
 
 测试代码--->被测代码--->被测代码依赖库（无源码）
 
-编译被测代码 使用-Dprivate=public -Dprotect=public -Dclass=struct 
+第一步、编译被测代码，编译成静态库.a( 使用-Dprivate=public -Dprotect=public -Dclass=struct )
 
-编译测试代码结合gtest或者cppunit，使用stub.h头文件
+第二步、编译测试代码，结合gtest或者cppunit，（测试代码包含头文件stub.h）
 
-
+说明：stub类用来打桩使用；private相关获取类的私有成员
 
 
 
