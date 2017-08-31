@@ -97,10 +97,13 @@ int main()
     auto &a_c = access_private_field_static::A::Ac();
     a_b=555;
     a_c=666;
+    
+    printf("========================================\n");
 
     call_private_fun::Af1(a,1);
     a.f2(2);
     call_private_fun_static::A::Af3(3);
+    printf("========================================\n");
 
 
     //replace object member function with custom function
@@ -119,11 +122,27 @@ int main()
     call_private_fun::Af1(a,11);
     a.f2(22);
     call_private_fun_static::A::Af3(33);
+    printf("========================================\n");
 
+    //reset
+    stub->reset(a_f1);
+    stub->reset(a_f3);
+    
+    call_private_fun::Af1(a,111);
+    a.f2(222);
+    call_private_fun_static::A::Af3(333);
+    printf("========================================\n");
+
+    //recover object member function
+    delete stub;
+    
+    call_private_fun::Af1(a,1111);
+    a.f2(2222);
+    call_private_fun_static::A::Af3(3333);
+    printf("========================================\n");
 
     return 0;
 }
-
 
 
 ```
