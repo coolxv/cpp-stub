@@ -273,7 +273,7 @@ namespace {
                                                           Name)                \
   PRIVATE_ACCESS_DETAIL_ACCESS_PRIVATE(Tag, Class, Type, Name, *)              \
   namespace {                                                                  \
-    namespace access_private_field_static {                                          \
+    namespace access_private_static_field {                                          \
       namespace Class {                                                        \
         Type &Class##Name() { return *get(private_access_detail::Tag{}); }     \
       }                                                                        \
@@ -284,7 +284,7 @@ namespace {
                                                         Name)                  \
   PRIVATE_ACCESS_DETAIL_ACCESS_PRIVATE(Tag, Class, Type, Name, *)              \
   namespace {                                                                  \
-    namespace call_private_fun_static {                                            \
+    namespace call_private_static_fun {                                            \
       namespace Class {                                                        \
         template <typename... Args>                                            \
         auto Class##Name(Args &&... args) -> decltype(                         \
@@ -294,7 +294,7 @@ namespace {
         }                                                                      \
       }                                                                        \
     }                                                                          \
-    namespace get_private_fun_static {                                        \
+    namespace get_private_static_fun {                                        \
       namespace Class {                                                        \
         auto Class##Name() -> decltype(get(private_access_detail::Tag{})) {    \
           return get(private_access_detail::Tag{});                            \

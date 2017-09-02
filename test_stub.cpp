@@ -61,7 +61,7 @@ void f2(void *obj,int a)
 }
 void f3(int a)
 {
-    auto &a_c = access_private_field_static::A::Ac();
+    auto &a_c = access_private_static_field::A::Ac();
     printf("[f3] ===> a = %d, c = %d\n", a, a_c);
 
     return;
@@ -75,7 +75,7 @@ int main()
     A a;
 
     auto &a_b = access_private_field::Ab(a);
-    auto &a_c = access_private_field_static::A::Ac();
+    auto &a_c = access_private_static_field::A::Ac();
     a_b=555;
     a_c=666;
     
@@ -83,7 +83,7 @@ int main()
 
     call_private_fun::Af1(a,1);
     a.f2(2);
-    call_private_fun_static::A::Af3(3);
+    call_private_static_fun::A::Af3(3);
     printf("========================================\n");
 
 
@@ -92,7 +92,7 @@ int main()
     Stub *stub = new Stub;
 
     auto a_f1= get_private_fun::Af1();
-    auto a_f3 = get_private_fun_static::A::Af3();
+    auto a_f3 = get_private_static_fun::A::Af3();
 
 
     stub->set(a_f1, f1);
@@ -102,7 +102,7 @@ int main()
 
     call_private_fun::Af1(a,11);
     a.f2(22);
-    call_private_fun_static::A::Af3(33);
+    call_private_static_fun::A::Af3(33);
     printf("========================================\n");
 
     //reset
@@ -111,7 +111,7 @@ int main()
     
     call_private_fun::Af1(a,111);
     a.f2(222);
-    call_private_fun_static::A::Af3(333);
+    call_private_static_fun::A::Af3(333);
     printf("========================================\n");
 
     //recover object member function
@@ -119,7 +119,7 @@ int main()
     
     call_private_fun::Af1(a,1111);
     a.f2(2222);
-    call_private_fun_static::A::Af3(3333);
+    call_private_static_fun::A::Af3(3333);
     printf("========================================\n");
 
     return 0;
