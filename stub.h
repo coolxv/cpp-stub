@@ -51,14 +51,14 @@ public:
         for(iter=m_result.begin(); iter != m_result.end(); iter++)
         {
             pstub = iter->second;
-            if (-1 == mprotect(pageof(pstub->fn), m_pagesize, PROT_READ | PROT_WRITE | PROT_EXEC))
+            if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
             {
                 throw("stub mprotect to w+r+x faild");
             }
 
             memcpy(pstub->fn, pstub->code_buf, CODESIZE);
             
-            if (-1 == mprotect(pageof(pstub->fn), m_pagesize, PROT_READ | PROT_EXEC))
+            if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC))
             {
                 throw("stub mprotect to r+x failed");
             }
@@ -83,7 +83,7 @@ public:
         pstub->fn = fn;
         memcpy(pstub->code_buf, fn, CODESIZE);
         
-        if (-1 == mprotect(pageof(fn), m_pagesize, PROT_READ | PROT_WRITE | PROT_EXEC))
+        if (-1 == mprotect(pageof(fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
         {
             throw("stub set mprotect to w+r+x faild");
         }
@@ -91,7 +91,7 @@ public:
         *(unsigned char *)fn = (unsigned char)0xE9;
         *(unsigned int *)((unsigned char *)fn + 1) = (unsigned char *)fn_stub - (unsigned char *)fn - CODESIZE;
         
-        if (-1 == mprotect(pageof(fn), m_pagesize, PROT_READ | PROT_EXEC))
+        if (-1 == mprotect(pageof(fn), m_pagesize * 2, PROT_READ | PROT_EXEC))
         {
             throw("stub set mprotect to r+x failed");
         }
@@ -115,14 +115,14 @@ public:
         pstub = iter->second;
         
 
-        if (-1 == mprotect(pageof(pstub->fn), m_pagesize, PROT_READ | PROT_WRITE | PROT_EXEC))
+        if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
         {
             throw("stub reset mprotect to w+r+x faild");
         }
 
         memcpy(pstub->fn, pstub->code_buf, CODESIZE);
         
-        if (-1 == mprotect(pageof(pstub->fn), m_pagesize, PROT_READ | PROT_EXEC))
+        if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC))
         {
             throw("stub reset mprotect to r+x failed");
         }
