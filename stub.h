@@ -1,10 +1,15 @@
 #ifndef __STUB_H__
 #define __STUB_H__
 
+
+#ifdef _WIN32
+#include <windows.h>
+#else
 //linux
 #include <memory.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#endif
 //c
 #include <cstdlib>
 #include <climits>
@@ -12,7 +17,11 @@
 #include <exception>
 #include <map>
 #include <utility>
+#if defined(_WIN32) || (__cplusplus >= 201103L)
 #include <type_traits>
+#endif
+
+
 
 
 
@@ -37,7 +46,15 @@ class Stub
 public:
     Stub()
     {
+
+#ifdef _WIN32
+        SYSTEM_INFO sys_info;  
+        GetSystemInfo(&sys_info);
+        m_pagesize = sys_info.dwPageSize;
+#else
         m_pagesize = sysconf(_SC_PAGE_SIZE);
+#endif       
+
         if (m_pagesize < 0)
         {
             m_pagesize = 4096;
@@ -51,17 +68,21 @@ public:
         for(iter=m_result.begin(); iter != m_result.end(); iter++)
         {
             pstub = iter->second;
-            if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
+#ifdef _WIN32
+            DWORD lpflOldProtect;
+            if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READWRITE, &lpflOldProtect))
+#else
+            if (-1 != mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
+#endif       
             {
-                throw("stub mprotect to w+r+x faild");
+                memcpy(pstub->fn, pstub->code_buf, CODESIZE);
+#ifdef _WIN32
+                VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect);
+#else
+                mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC);
+#endif     
             }
 
-            memcpy(pstub->fn, pstub->code_buf, CODESIZE);
-            
-            if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC))
-            {
-                throw("stub mprotect to r+x failed");
-            }
             iter->second  = NULL;
             delete pstub;        
             
@@ -82,16 +103,23 @@ public:
         //start
         pstub->fn = fn;
         memcpy(pstub->code_buf, fn, CODESIZE);
-        
-        if (-1 == mprotect(pageof(fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
+#ifdef _WIN32
+        DWORD lpflOldProtect;
+        if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READWRITE, &lpflOldProtect))
+#else
+        if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
+#endif       
         {
             throw("stub set mprotect to w+r+x faild");
         }
 
         *(unsigned char *)fn = (unsigned char)0xE9;
         *(unsigned int *)((unsigned char *)fn + 1) = (unsigned char *)fn_stub - (unsigned char *)fn - CODESIZE;
-        
-        if (-1 == mprotect(pageof(fn), m_pagesize * 2, PROT_READ | PROT_EXEC))
+#ifdef _WIN32
+        if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect))
+#else
+        if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC))
+#endif     
         {
             throw("stub set mprotect to r+x failed");
         }
@@ -114,15 +142,22 @@ public:
         struct func_stub *pstub;
         pstub = iter->second;
         
-
+#ifdef _WIN32
+            DWORD lpflOldProtect;
+        if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READWRITE, &lpflOldProtect))
+#else
         if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
+#endif       
         {
             throw("stub reset mprotect to w+r+x faild");
         }
 
         memcpy(pstub->fn, pstub->code_buf, CODESIZE);
-        
+#ifdef _WIN32
+        if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect))
+#else
         if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC))
+#endif     
         {
             throw("stub reset mprotect to r+x failed");
         }
@@ -160,15 +195,14 @@ private:
              get private member
 **********************************************************/
 
+#if defined(_WIN32) || (__cplusplus >= 201103L)
 
-#if __cplusplus == 201103L
 namespace std {
   template <bool B, class T = void>
   using enable_if_t = typename enable_if<B, T>::type;
   template <class T>
   using remove_reference_t = typename remove_reference<T>::type;
 } // std
-#endif
 
 // Unnamed namespace is used to avoid duplicate symbols if the macros are used
 namespace {
@@ -324,4 +358,4 @@ namespace {
       PRIVATE_ACCESS_DETAIL_UNIQUE_TAG, Class, Type, Name)
 
 #endif
-
+#endif

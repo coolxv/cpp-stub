@@ -17,7 +17,6 @@ int foo_stub(void* obj, int a)
     return 0;
 }
 
-
 int main()
 {
     Stub stub;
