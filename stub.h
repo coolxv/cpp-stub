@@ -2,7 +2,7 @@
 #define __STUB_H__
 
 
-#ifdef _WIN32
+#ifdef _WIN32 
 #include <windows.h>
 #else
 //linux
@@ -18,7 +18,7 @@
 #include <exception>
 #include <map>
 #include <utility>
-#if defined(_WIN32) || (__cplusplus >= 201103L)
+#if defined(_WIN32) &&  (_MSC_VER >= 1800) || (__cplusplus >= 201103L)
 #include <type_traits>
 #endif
 
@@ -202,7 +202,7 @@ private:
              get private member
 **********************************************************/
 
-#if defined(_WIN32) || (__cplusplus >= 201103L)
+#if defined(_WIN32)  &&  (_MSC_VER >= 1800) || (__cplusplus >= 201103L)
 
 namespace std {
   template <bool B, class T = void>
