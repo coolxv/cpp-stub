@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <climits>
 //c++
+#include<iostream>
 #include <exception>
 #include <map>
 #include <utility>
@@ -29,8 +30,6 @@
 /**********************************************************
                   replace function
 **********************************************************/
-
-
 #define ADDR(CLASS_NAME,MEMBER_NAME) (&CLASS_NAME::MEMBER_NAME)
 #define CODESIZE 5U
 
@@ -169,7 +168,11 @@ public:
 private:
     void *pageof(const void* p)
     { 
+#ifdef _WIN32
+        return (void *)((unsigned long long)p & ~(m_pagesize - 1));
+#else
         return (void *)((unsigned long)p & ~(m_pagesize - 1));
+#endif   
     }
 
     template<typename T>
@@ -185,7 +188,11 @@ private:
     }
 
 private:
+#ifdef _WIN32
+    long long m_pagesize;
+#else
     long m_pagesize;
+#endif   
     std::map<void*, func_stub*> m_result;
     
 };
