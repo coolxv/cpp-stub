@@ -92,7 +92,7 @@ public:
     }
     template<typename T,typename S>
     void set(T addr, S addr_stub)
-    {	
+    {
         void * fn;
         void * fn_stub;
         fn = addrof(addr);
@@ -128,7 +128,7 @@ public:
 
     template<typename T>
     void reset(T addr)
-    {	
+    {
         void * fn;
         fn = addrof(addr);
         
@@ -142,7 +142,7 @@ public:
         pstub = iter->second;
         
 #ifdef _WIN32
-            DWORD lpflOldProtect;
+        DWORD lpflOldProtect;
         if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READWRITE, &lpflOldProtect))
 #else
         if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
