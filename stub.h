@@ -24,9 +24,6 @@
 
 
 
-
-
-
 /**********************************************************
                   replace function
 **********************************************************/
@@ -199,7 +196,7 @@ private:
 
 
 /**********************************************************
-             get private member
+             access private function
 **********************************************************/
 
 #if defined(_WIN32)  &&  (_MSC_VER >= 1800) || (__cplusplus >= 201103L)
@@ -270,7 +267,7 @@ namespace {
 #define PRIVATE_ACCESS_DETAIL_ACCESS_PRIVATE_FIELD(Tag, Class, Type, Name)     \
   PRIVATE_ACCESS_DETAIL_ACCESS_PRIVATE(Tag, Class, Type, Name, Class::*)       \
   namespace {                                                                  \
-    namespace access_private_field {                                                 \
+    namespace access_private_field {                                                  \
       Type &Class##Name(Class &&t) { return t.*get(private_access_detail::Tag{}); }   \
       Type &Class##Name(Class &t) { return t.*get(private_access_detail::Tag{}); }    \
       /* The following usings are here to avoid duplicate const qualifier      \
@@ -288,7 +285,7 @@ namespace {
 #define PRIVATE_ACCESS_DETAIL_ACCESS_PRIVATE_FUN(Tag, Class, Type, Name)       \
   PRIVATE_ACCESS_DETAIL_ACCESS_PRIVATE(Tag, Class, Type, Name, Class::*)       \
   namespace {                                                                  \
-    namespace call_private_fun {                                                   \
+    namespace call_private_fun {                                               \
       /* We do perfect forwarding, but we want to restrict the overload set    \
        * only for objects which have the type Class. */                        \
       template <typename Obj,                                                  \
@@ -302,7 +299,7 @@ namespace {
             std::forward<Args>(args)...);                                      \
       }                                                                        \
     }                                                                          \
-    namespace get_private_fun {                                               \
+    namespace get_private_fun {                                                \
       auto Class##Name()  -> decltype(                                         \
           get(private_access_detail::Tag{})) {                                 \
         return (get(private_access_detail::Tag{}));                            \
@@ -314,7 +311,7 @@ namespace {
                                                           Name)                \
   PRIVATE_ACCESS_DETAIL_ACCESS_PRIVATE(Tag, Class, Type, Name, *)              \
   namespace {                                                                  \
-    namespace access_private_static_field {                                          \
+    namespace access_private_static_field {                                    \
       namespace Class {                                                        \
         Type &Class##Name() { return *get(private_access_detail::Tag{}); }     \
       }                                                                        \
@@ -325,7 +322,7 @@ namespace {
                                                         Name)                  \
   PRIVATE_ACCESS_DETAIL_ACCESS_PRIVATE(Tag, Class, Type, Name, *)              \
   namespace {                                                                  \
-    namespace call_private_static_fun {                                            \
+    namespace call_private_static_fun {                                        \
       namespace Class {                                                        \
         template <typename... Args>                                            \
         auto Class##Name(Args &&... args) -> decltype(                         \
@@ -335,7 +332,7 @@ namespace {
         }                                                                      \
       }                                                                        \
     }                                                                          \
-    namespace get_private_static_fun {                                        \
+    namespace get_private_static_fun {                                         \
       namespace Class {                                                        \
         auto Class##Name() -> decltype(get(private_access_detail::Tag{})) {    \
           return get(private_access_detail::Tag{});                            \
