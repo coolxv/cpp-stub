@@ -3,7 +3,7 @@
 **说明：**
 - 只适用linux，和windows的x86、x64架构
 - access private function相关方法基于C++11（参考：[https://github.com/martong/access_private](https://github.com/martong/access_private)）
-- replace function相关方法基于C++03（参考：[http://jbremer.org/x86-api-hooking-demystified/#ah-other-2](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)）
+- replace function相关方法基于C++03（参考：[http://jbremer.org/x86-api-hooking-demystified/#ah-other-2](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries)）
 - windows和linux的用法会稍微不同，原因是获取不同类型函数地址的方法不同，且调用约定有时不一样
 
 **不可以打桩的情况：**
