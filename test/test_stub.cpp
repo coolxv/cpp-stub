@@ -4,7 +4,7 @@
 
 #include "stub.h"
 
-// g++ -g test_stub.cpp -std=c++11  -o test_stub
+// g++ -g test_stub.cpp -std=c++11 -I../ -o test_stub
 
 
 class A
