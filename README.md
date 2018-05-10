@@ -11,6 +11,7 @@
 -	不可以对纯虚函数打桩，纯虚函数没有地址
 -	static声明的普通内部函数不能打桩，内部函数地址不可见（解析ELF通过symtab节获得函数地址，可使用addr.h）
 
+![](https://github.com/coolxv/cpp-stub/blob/master/intel.png)
 
 ***
 
