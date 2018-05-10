@@ -1,4 +1,7 @@
 #include <iostream>
+#include <string>
+#include <stdio.h>
+
 #include "addr.h"
 #include "stub.h"
 
@@ -6,7 +9,7 @@
 
 static int test_test()
 {
-    std::cout << "test_test" << std::endl;
+    printf("test_test\n");
     return 0;
 }
 
@@ -17,9 +20,15 @@ static int xxx_stub()
 }
 int main(int argc, char **argv)
 {
+    std::string res;
+    get_exe_pathname(res);
+    std::cout << res << std::endl;
+    unsigned long base_addr;
+    get_lib_pathname_and_baseaddr("libc-2.17.so", res, base_addr);
+    std::cout << res << base_addr << std::endl;
     std::map<std::string,ELFIO::Elf64_Addr> result;
-    get_exe_local_func_addr(argv[0], "test_test", result);
-
+    get_weak_func_addr(res, "^puts$", result);
+    
     test_test();
 
 
@@ -27,8 +36,8 @@ int main(int argc, char **argv)
     std::map<std::string,ELFIO::Elf64_Addr>::iterator it;
     for (it=result.begin(); it!=result.end(); ++it)
     {
-        stub.set(it->second,xxx_stub);
-        std::cout << it->first << " => " << it->second << '\n';
+        //stub.set(it->second + base_addr ,xxx_stub);
+        std::cout << it->first << " => " << it->second + base_addr<<std::endl;
     }
 
     test_test();

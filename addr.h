@@ -1,21 +1,28 @@
 #ifndef __ADDR_H__
 #define __ADDR_H__
 
+#include <inttypes.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
+#include <regex.h>
 #include <map>
 #include <cxxabi.h>
 #include <elfio/elfio.hpp>
 
-
 bool demangle(std::string s, std::string& res) {
     int status;
     char* name = abi::__cxa_demangle(s.c_str(), 0, 0, &status);
-    if (status != 0) {
-        std::string err;
-        switch(status) {
-        case -1: res = "memory allocation error"; break;
-        case -2: res = "invalid name given"; break;
-        case -3: res = "internal error: __cxa_demangle: invalid argument"; break;
-        default: res = "unknown error occured"; break;
+    if (status != 0)
+    {
+        switch(status)
+        {
+            case -1: res = "memory allocation error"; break;
+            case -2: res = "invalid name given"; break;
+            case -3: res = "internal error: __cxa_demangle: invalid argument"; break;
+            default: res = "unknown error occured"; break;
         }
         return false;
     }
@@ -25,12 +32,150 @@ bool demangle(std::string s, std::string& res) {
 }
 
 
-int get_exe_local_func_addr(std::string file_name, std::string func_name, std::map<std::string,ELFIO::Elf64_Addr>& result)
+
+bool get_exe_pathname( std::string& res)
+{
+    char                     line[512];
+    FILE                    *fp;
+    uintptr_t                base_addr;
+    char                     perm[5];
+    unsigned long            offset;
+    int                      pathname_pos;
+    char                    *pathname;
+    size_t                   pathname_len;
+    int                      match = 0;
+    
+    if(NULL == (fp = fopen("/proc/self/maps", "r")))
+    {
+        return false;
+    }
+
+    while(fgets(line, sizeof(line), fp))
+    {
+        if(sscanf(line, "%" PRIxPTR "-%*lx %4s %lx %*x:%*x %*d%n", &base_addr, perm, &offset, &pathname_pos) != 3) continue;
+
+        if(0 != offset) continue;
+
+        //get pathname
+        while(isspace(line[pathname_pos]) && pathname_pos < (int)(sizeof(line) - 1))
+            pathname_pos += 1;
+        if(pathname_pos >= (int)(sizeof(line) - 1)) continue;
+        pathname = line + pathname_pos;
+        pathname_len = strlen(pathname);
+        if(0 == pathname_len) continue;
+        if(pathname[pathname_len - 1] == '\n')
+        {
+            pathname[pathname_len - 1] = '\0';
+            pathname_len -= 1;
+        }
+        if(0 == pathname_len) continue;
+        if('[' == pathname[0]) continue;
+
+        res = pathname;
+        match = 1;
+        break;
+
+    }
+    fclose(fp);
+
+    if(0 == match)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+
+}
+
+
+
+
+bool get_lib_pathname_and_baseaddr(std::string pathname_regex_str, std::string& res, unsigned long& addr)
+{
+    char                     line[512];
+    FILE                    *fp;
+    uintptr_t                base_addr;
+    char                     perm[5];
+    unsigned long            offset;
+    int                      pathname_pos;
+    char                    *pathname;
+    size_t                   pathname_len;
+    int                      match;
+    regex_t   pathname_regex;
+
+    regcomp(&pathname_regex, pathname_regex_str.c_str(), 0);
+
+    if(NULL == (fp = fopen("/proc/self/maps", "r")))
+    {
+        return false;
+    }
+
+    while(fgets(line, sizeof(line), fp))
+    {
+        if(sscanf(line, "%" PRIxPTR "-%*lx %4s %lx %*x:%*x %*d%n", &base_addr, perm, &offset, &pathname_pos) != 3) continue;
+
+        //check permission
+        if(perm[0] != 'r') continue;
+        if(perm[3] != 'p') continue; //do not touch the shared memory
+
+        //check offset
+        //
+        //We are trying to find ELF header in memory.
+        //It can only be found at the beginning of a mapped memory regions
+        //whose offset is 0.
+        if(0 != offset) continue;
+
+        //get pathname
+        while(isspace(line[pathname_pos]) && pathname_pos < (int)(sizeof(line) - 1))
+            pathname_pos += 1;
+        if(pathname_pos >= (int)(sizeof(line) - 1)) continue;
+        pathname = line + pathname_pos;
+        pathname_len = strlen(pathname);
+        if(0 == pathname_len) continue;
+        if(pathname[pathname_len - 1] == '\n')
+        {
+            pathname[pathname_len - 1] = '\0';
+            pathname_len -= 1;
+        }
+        if(0 == pathname_len) continue;
+        if('[' == pathname[0]) continue;
+
+        //check pathname
+        //if we need to hook this elf?
+        match = 0;
+        if(0 == regexec(&pathname_regex, pathname, 0, NULL, 0))
+        {
+            match = 1;
+            res = pathname;
+            addr = (unsigned long)base_addr;
+            break;
+        }
+        if(0 == match) continue;
+
+    }
+    fclose(fp);
+    if(0 == match)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+
+}
+
+
+int get_local_func_addr(std::string file_name, std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
 {
     // Create an elfio reader
     ELFIO::elfio reader;
     int count = 0;
-    
+    regex_t   pathname_regex;
+
+    regcomp(&pathname_regex, func_name_regex_str.c_str(), 0);
     // Load ELF data
     if(!reader.load(file_name.c_str()))
     {
@@ -63,8 +208,7 @@ int get_exe_local_func_addr(std::string file_name, std::string func_name, std::m
                     bool ret = demangle(name,name_mangle);
                     if(ret == true)
                     {
-                        std::size_t found = name_mangle.find(func_name);
-                        if (found != std::string::npos)
+                        if (0 == regexec(&pathname_regex, name_mangle.c_str(), 0, NULL, 0))
                         {
                               result.insert ( std::pair<std::string,ELFIO::Elf64_Addr>(name_mangle,value));
                               count++;
@@ -72,8 +216,7 @@ int get_exe_local_func_addr(std::string file_name, std::string func_name, std::m
                     }
                     else
                     {
-                        std::size_t found = name.find(func_name);
-                        if (found != std::string::npos)
+                        if (0 == regexec(&pathname_regex, name.c_str(), 0, NULL, 0))
                         {
                               result.insert ( std::pair<std::string,ELFIO::Elf64_Addr>(name,value));
                               count++;
@@ -87,12 +230,14 @@ int get_exe_local_func_addr(std::string file_name, std::string func_name, std::m
     
     return count;
 }
-int get_exe_globle_func_addr(std::string file_name, std::string func_name, std::map<std::string,ELFIO::Elf64_Addr>& result)
+int get_globle_func_addr(std::string file_name, std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
 {
     // Create an elfio reader
     ELFIO::elfio reader;
     int count = 0;
-    
+    regex_t   pathname_regex;
+
+    regcomp(&pathname_regex, func_name_regex_str.c_str(), 0);
     // Load ELF data
     if(!reader.load(file_name.c_str()))
     {
@@ -125,8 +270,7 @@ int get_exe_globle_func_addr(std::string file_name, std::string func_name, std::
                     bool ret = demangle(name,name_mangle);
                     if(ret == true)
                     {
-                        std::size_t found = name_mangle.find(func_name);
-                        if (found != std::string::npos)
+                        if (0 == regexec(&pathname_regex, name_mangle.c_str(), 0, NULL, 0))
                         {
                               result.insert ( std::pair<std::string,ELFIO::Elf64_Addr>(name_mangle,value));
                               count++;
@@ -134,8 +278,7 @@ int get_exe_globle_func_addr(std::string file_name, std::string func_name, std::
                     }
                     else
                     {
-                        std::size_t found = name.find(func_name);
-                        if (found != std::string::npos)
+                        if (0 == regexec(&pathname_regex, name.c_str(), 0, NULL, 0))
                         {
                               result.insert ( std::pair<std::string,ELFIO::Elf64_Addr>(name,value));
                               count++;
@@ -149,12 +292,14 @@ int get_exe_globle_func_addr(std::string file_name, std::string func_name, std::
     
     return count;
 }
-int get_exe_weak_func_addr(std::string file_name, std::string func_name, std::map<std::string,ELFIO::Elf64_Addr>& result)
+int get_weak_func_addr(std::string file_name, std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
 {
     // Create an elfio reader
     ELFIO::elfio reader;
     int count = 0;
-    
+    regex_t   pathname_regex;
+
+    regcomp(&pathname_regex, func_name_regex_str.c_str(), 0);
     // Load ELF data
     if(!reader.load(file_name.c_str()))
     {
@@ -187,8 +332,7 @@ int get_exe_weak_func_addr(std::string file_name, std::string func_name, std::ma
                     bool ret = demangle(name,name_mangle);
                     if(ret == true)
                     {
-                        std::size_t found = name_mangle.find(func_name);
-                        if (found != std::string::npos)
+                        if (0 == regexec(&pathname_regex, name_mangle.c_str(), 0, NULL, 0))
                         {
                               result.insert ( std::pair<std::string,ELFIO::Elf64_Addr>(name_mangle,value));
                               count++;
@@ -196,8 +340,7 @@ int get_exe_weak_func_addr(std::string file_name, std::string func_name, std::ma
                     }
                     else
                     {
-                        std::size_t found = name.find(func_name);
-                        if (found != std::string::npos)
+                        if (0 == regexec(&pathname_regex, name.c_str(), 0, NULL, 0))
                         {
                               result.insert ( std::pair<std::string,ELFIO::Elf64_Addr>(name,value));
                               count++;
