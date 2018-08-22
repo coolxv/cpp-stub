@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     std::map<std::string,ELFIO::Elf64_Addr>::iterator it;
     for (it=result.begin(); it!=result.end(); ++it)
     {
-        //stub.set(it->second + base_addr ,xxx_stub);
+        stub.set(it->second + base_addr ,xxx_stub);
         std::cout << it->first << " => " << it->second + base_addr<<std::endl;
     }
 

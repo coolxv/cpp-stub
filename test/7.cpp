@@ -1,5 +1,6 @@
 #include<iostream>
 #include "stub.h"
+#include "addr_pri.h"
 using namespace std;
 class A{
     int a;
