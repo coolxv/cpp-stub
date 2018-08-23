@@ -15,10 +15,9 @@
 #include <cstdlib>
 #include <climits>
 //c++
-#include<iostream>
+#include <iostream>
 #include <exception>
 #include <map>
-#include <utility>
 
 
 
@@ -106,9 +105,9 @@ public:
             memcpy(pstub->fn, pstub->code_buf, CODESIZE);
 #endif
 #ifdef _WIN32
-                VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect);
+            VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect);
 #else
-                mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC);
+            mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC);
 #endif     
             }
 
