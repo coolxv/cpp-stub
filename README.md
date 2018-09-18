@@ -4,7 +4,7 @@
 - 只适用linux，和windows的x86、x64架构
 - stub.h(windows、linux)相关方法基于C++03;使用Inline Hook方式（参考：[http://jbremer.org/x86-api-hooking-demystified/#ah-other-2](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries)）
 - addr_pri.h(windows、linux)相关方法基于C++11（参考：[https://github.com/martong/access_private](https://github.com/martong/access_private)）
-- addr.h(linux) 相关方法基于C++03,使用elfio库（参考：（参考：[https://github.com/serge1/ELFIO)）
+- addr.h(linux) 相关方法基于C++03,使用elfio库（参考：[https://github.com/serge1/ELFIO)）
 
 - windows和linux的用法会稍微不同，原因是获取不同类型函数地址的方法不同，且调用约定有时不一样
 
