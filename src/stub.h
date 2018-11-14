@@ -27,7 +27,7 @@
 **********************************************************/
 #define ADDR(CLASS_NAME,MEMBER_NAME) (&CLASS_NAME::MEMBER_NAME)
 #ifdef __x86_64__
-#define CODESIZE 14U
+#define CODESIZE 12U
 #define CODESIZE_MIN 5U
 #define CODESIZE_MAX CODESIZE
 bool judge_far_jmp(void* addr, void* addr_stub)
@@ -157,12 +157,13 @@ public:
 #ifdef __x86_64__
         if(pstub->far_jmp)
         {
-            //14 byte
-            *(unsigned char*)fn = 0x68;
-            *(unsigned int *)((unsigned char *)fn + 1) = (unsigned int)((unsigned long long)fn_stub & 0xffffffff);
-            *(unsigned int *)((unsigned char *)fn + 5) = (unsigned int)(0x042444c7);
-            *(unsigned int *)((unsigned char *)fn + 9) = (unsigned int)((unsigned long long)fn_stub >> 32);
-            *(unsigned char *)((unsigned char *)fn + 13) = 0xc3;
+            //12 byte
+            *(unsigned char*)fn = 0x48;
+            *((unsigned char*)fn + 1) = 0xb8;
+            *(unsigned long long *)((unsigned char *)fn + 2) = (unsigned long long)fn_stub;
+            *(unsigned char *)((unsigned char *)fn + 10) = 0x50;
+            *(unsigned char *)((unsigned char *)fn + 11) = 0xc3;          
+
         }
         else
         {
