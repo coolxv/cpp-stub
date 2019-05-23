@@ -12,7 +12,7 @@
 #include <cxxabi.h>
 #include <elfio/elfio.hpp>
 
-bool demangle(std::string s, std::string& res) {
+inline bool demangle(std::string s, std::string& res) {
     int status;
     char* name = abi::__cxa_demangle(s.c_str(), 0, 0, &status);
     if (status != 0)
@@ -33,7 +33,7 @@ bool demangle(std::string s, std::string& res) {
 
 
 
-bool get_exe_pathname( std::string& res)
+inline bool get_exe_pathname( std::string& res)
 {
     char                     line[512];
     FILE                    *fp;
@@ -92,7 +92,7 @@ bool get_exe_pathname( std::string& res)
 
 
 
-bool get_lib_pathname_and_baseaddr(std::string pathname_regex_str, std::string& res, unsigned long& addr)
+inline bool get_lib_pathname_and_baseaddr(std::string pathname_regex_str, std::string& res, unsigned long& addr)
 {
     char                     line[512];
     FILE                    *fp;
@@ -168,7 +168,7 @@ bool get_lib_pathname_and_baseaddr(std::string pathname_regex_str, std::string& 
 }
 
 
-int get_local_func_addr(std::string file_name, std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+inline int get_local_func_addr(std::string file_name, std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
 {
     // Create an elfio reader
     ELFIO::elfio reader;
@@ -230,7 +230,7 @@ int get_local_func_addr(std::string file_name, std::string func_name_regex_str, 
     
     return count;
 }
-int get_globle_func_addr(std::string file_name, std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+inline int get_globle_func_addr(std::string file_name, std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
 {
     // Create an elfio reader
     ELFIO::elfio reader;
@@ -292,7 +292,7 @@ int get_globle_func_addr(std::string file_name, std::string func_name_regex_str,
     
     return count;
 }
-int get_weak_func_addr(std::string file_name, std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+inline int get_weak_func_addr(std::string file_name, std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
 {
     // Create an elfio reader
     ELFIO::elfio reader;

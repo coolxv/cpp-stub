@@ -30,21 +30,6 @@
 #define CODESIZE 12U
 #define CODESIZE_MIN 5U
 #define CODESIZE_MAX CODESIZE
-bool judge_far_jmp(void* addr, void* addr_stub)
-{
-    unsigned long long addr_tmp = (unsigned long long)addr;
-    unsigned long long addr_stub_tmp = (unsigned long long)addr_stub;
-    unsigned int int_addr_tmp = (unsigned int)(addr_tmp >> 32);
-    unsigned int int_addr_stub_tmp = (unsigned int)(addr_stub_tmp >> 32);
-    if((int_addr_tmp > 0 && int_addr_stub_tmp > 0) || (int_addr_tmp == 0 && int_addr_stub_tmp == 0))
-    {
-        return false;
-    }
-    else 
-    {
-        return true;
-    }
-}
 #else
 #define CODESIZE 5U
 #endif
@@ -264,7 +249,23 @@ private:
         ut._s = src;
         return ut._d;
     }
-
+#ifdef __x86_64__
+	bool judge_far_jmp(void* addr, void* addr_stub)
+	{
+		unsigned long long addr_tmp = (unsigned long long)addr;
+		unsigned long long addr_stub_tmp = (unsigned long long)addr_stub;
+		unsigned int int_addr_tmp = (unsigned int)(addr_tmp >> 32);
+		unsigned int int_addr_stub_tmp = (unsigned int)(addr_stub_tmp >> 32);
+		if((int_addr_tmp > 0 && int_addr_stub_tmp > 0) || (int_addr_tmp == 0 && int_addr_stub_tmp == 0))
+		{
+			return false;
+		}
+		else 
+		{
+			return true;
+		}
+	}
+#endif
 private:
 #ifdef _WIN32
     long long m_pagesize;
