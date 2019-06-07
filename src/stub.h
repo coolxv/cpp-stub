@@ -116,7 +116,7 @@ public:
         //start
         pstub->fn = fn;
 #ifdef __x86_64__
-        if(judge_far_jmp(fn, fn_stub))
+        if(distanceof(fn, fn_stub))
         {
             pstub->far_jmp = true;
             memcpy(pstub->code_buf, fn, CODESIZE_MAX);
@@ -250,7 +250,7 @@ private:
         return ut._d;
     }
 #ifdef __x86_64__
-	bool judge_far_jmp(void* addr, void* addr_stub)
+	bool distanceof(void* addr, void* addr_stub)
 	{
 		unsigned long long addr_tmp = (unsigned long long)addr;
 		unsigned long long addr_stub_tmp = (unsigned long long)addr_stub;

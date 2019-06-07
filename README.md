@@ -1,11 +1,10 @@
-![](https://github.com/coolxv/cpp-stub/blob/master/mm.png)
+
 
 **说明：**
-- 只适用linux，和windows的x86、x64架构
-- stub.h(windows、linux)相关方法基于C++03;使用Inline Hook方式（参考：[http://jbremer.org/x86-api-hooking-demystified/#ah-other-2](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries)）
-- addr_pri.h(windows、linux)相关方法基于C++11（参考：[https://github.com/martong/access_private](https://github.com/martong/access_private)）
-- addr.h(linux) 相关方法基于C++03,使用elfio库（参考：[https://github.com/serge1/ELFIO)）
-
+- stub.h(适用windows、linux)相关方法基于C++03;使用Inline Hook方式;主要完成桩函数替换功能（参考：[http://jbremer.org/x86-api-hooking-demystified/#ah-other-2](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries)）
+- addr_pri.h(适用windows、linux)相关方法基于C++11;主要完成类的私有函数地址获取（参考：[https://github.com/martong/access_private](https://github.com/martong/access_private)）
+- addr_any.h(只适用linux) 相关方法基于C++03,使用elfio库;主要完成任意形式函数地址获取（参考：[https://github.com/serge1/ELFIO)）
+- 只适用x86、x64架构
 - windows和linux的用法会稍微不同，原因是获取不同类型函数地址的方法不同，且调用约定有时不一样
 
 **不可以打桩的情况：**
@@ -13,7 +12,9 @@
 -	不可以对纯虚函数打桩，纯虚函数没有地址
 -	static声明的普通内部函数不能打桩，内部函数地址不可见（linux可使用addr.h来获取地址）
 
-![](https://github.com/coolxv/cpp-stub/blob/master/intel.png)
+
+![](https://github.com/coolxv/cpp-stub/blob/master/pic/mm.png)
+![](https://github.com/coolxv/cpp-stub/blob/master/pic/intel.png)
 
 ***
 
@@ -396,7 +397,7 @@ int main()
 ```
 
 
-## 第三方库私有成员函数打桩
+## 第三方库私有成员函数打桩,使用addr_pri.h接口
 
 ```
 //for linux
@@ -404,6 +405,7 @@ int main()
 //无源码的动态库或静态库无法自己编译，需要特殊技巧获取函数地址
 #include<iostream>
 #include "stub.h"
+#include "addr_pri.h"
 using namespace std;
 class A{
     int a;
@@ -524,4 +526,53 @@ int main()
 ```
 
 
+## 静态函数打桩,使用addr_any.h接口
+```
+#include <iostream>
+#include <string>
+#include <stdio.h>
 
+#include "addr_any.h"
+#include "stub.h"
+
+// g++ -g test_addr.cpp -std=c++11 -I../ -o test_addr
+
+static int test_test()
+{
+    printf("test_test\n");
+    return 0;
+}
+
+static int xxx_stub()
+{
+    std::cout << "xxx_stub" << std::endl;
+    return 0;
+}
+int main(int argc, char **argv)
+{
+    std::string res;
+    get_exe_pathname(res);
+    std::cout << res << std::endl;
+    unsigned long base_addr;
+    get_lib_pathname_and_baseaddr("libc-2.17.so", res, base_addr);
+    std::cout << res << base_addr << std::endl;
+    std::map<std::string,ELFIO::Elf64_Addr> result;
+    get_weak_func_addr(res, "^puts$", result);
+    
+    test_test();
+
+
+    Stub stub;
+    std::map<std::string,ELFIO::Elf64_Addr>::iterator it;
+    for (it=result.begin(); it!=result.end(); ++it)
+    {
+        stub.set(it->second + base_addr ,xxx_stub);
+        std::cout << it->first << " => " << it->second + base_addr<<std::endl;
+    }
+
+    test_test();
+    
+    return 0;
+}
+
+```
