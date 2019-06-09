@@ -4,8 +4,6 @@
 
 #include "stub.h"
 #include "addr_pri.h"
-// g++ -g test_addr_pri.cpp -std=c++11 -I../ -o test_addr_pri
-
 
 class A
 {

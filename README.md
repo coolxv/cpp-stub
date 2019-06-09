@@ -535,7 +535,6 @@ int main()
 #include "addr_any.h"
 #include "stub.h"
 
-// g++ -g test_addr.cpp -std=c++11 -I../ -o test_addr
 
 static int test_test()
 {
