@@ -10,7 +10,7 @@
 #include <regex.h>
 #include <map>
 #include <cxxabi.h>
-#include <elfio/elfio.hpp>
+#include "elfio/elfio/elfio.hpp"
 
 inline bool demangle(std::string s, std::string& res) {
     int status;

@@ -1,3 +1,6 @@
 [submodule "src/detours"]
 	path = src/detours
 	url = https://github.com/microsoft/Detours.git
+[submodule "src/elfio"]
+	path = src/elfio
+	url = https://github.com/serge1/ELFIO.git
