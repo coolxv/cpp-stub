@@ -5,7 +5,7 @@
 #include "addr_any.h"
 #include "stub.h"
 
-// g++ -g test_addr.cpp -std=c++11 -I../ -o test_addr
+// g++ -g test_addr_any.cpp -std=c++11 -I../ -o test_addr_any
 
 static int test_test()
 {

@@ -1,3 +1,5 @@
+//for linux，__cdecl
+// g++ -g test_overload_function_linux.cpp -std=c++11 -I../ -o test_overload_function_linux
 #include<iostream>
 #include "stub.h"
 using namespace std;

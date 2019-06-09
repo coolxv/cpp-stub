@@ -1,3 +1,4 @@
+//for windows，__thiscall
 #include<iostream>
 #include "stub.h"
 using namespace std;
@@ -11,18 +12,20 @@ public:
    }
 };
 
-int foo_stub(void* obj, int x)
-{   
-    A* o= (A*)obj;
-    cout<<"I am foo_stub"<<endl;
-    return 0;
-}
+
+class B {
+public:
+	int foo_stub(int a) {
+		cout << "I am foo_stub" << endl;
+		return 0;
+	}
+};
 
 
 int main()
 {
     Stub stub;
-    stub.set((int(A::*)(int))ADDR(A,foo), foo_stub);
+    stub.set((int(A::*)(int))ADDR(A,foo), ADDR(B, foo_stub));
     A a;
     a.foo(5);
     return 0;

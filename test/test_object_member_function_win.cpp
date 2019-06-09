@@ -1,3 +1,4 @@
+//for windows，__thiscall
 #include<iostream>
 #include "stub.h"
 using namespace std;
