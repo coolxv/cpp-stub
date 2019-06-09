@@ -1,5 +1,5 @@
-#ifndef __ADDR_H__
-#define __ADDR_H__
+#ifndef __ADDR_ANY_H__
+#define __ADDR_ANY_H__
 
 #include <inttypes.h>
 #include <stdio.h>

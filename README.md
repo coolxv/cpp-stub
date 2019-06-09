@@ -10,7 +10,7 @@
 **不可以打桩的情况：**
 -	不可以对exit函数打桩，编译器做了特殊优化
 -	不可以对纯虚函数打桩，纯虚函数没有地址
--	static声明的普通内部函数不能打桩，内部函数地址不可见（linux可使用addr.h来获取地址）
+-	static声明的普通内部函数不能打桩，内部函数地址不可见（linux可使用addr_any.h来获取地址）
 
 
 ![](https://github.com/coolxv/cpp-stub/blob/master/pic/mm.png)
