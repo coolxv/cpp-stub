@@ -10,3 +10,6 @@
 [submodule "other/stub"]
 	path = other/stub
 	url = https://github.com/3gguan/stub.git
+[submodule "other/lief"]
+	path = other/lief
+	url = https://github.com/lief-project/LIEF.git
