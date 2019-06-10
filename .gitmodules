@@ -13,3 +13,6 @@
 [submodule "other/lief"]
 	path = other/lief
 	url = https://github.com/lief-project/LIEF.git
+[submodule "src/pelib"]
+	path = src/pelib
+	url = https://github.com/avast/pelib.git
