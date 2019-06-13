@@ -6,14 +6,15 @@ LINK = link.exe
 RM = del 
 #
 CPPFLAGS = /nologo /D  "WIN32" /Od /c /EHsc /I..\src /I..\src_win 
-LDFLAGS = /nologo 
+LDFLAGS = /nologo /DEBUG:FULL
 INC = /I..\src /I..\src_win 
 #
 SRCS_CXX = test_private_member_function_win.cpp\
            test_template_function_win.cpp\
 		   test_virtual_function_x86_win.cpp\
 		   test_overload_function_win.cpp\
-		   test_objetc_member_function_linux.cpp\
+		   test_object_member_function_win.cpp\
+		   test_addr_any_win.cpp\
 		   test_function.cpp\
 		   test_class_member_function.cpp
 OBJS_CXX = $(SRCS_CXX:.cpp=.obj) 
@@ -32,7 +33,7 @@ $(TARGET): $(OBJS_CXX)
 
 clean: 
 	@echo  "Cleaning..." 
-	$(RM)  $(TARGETEXE) *.obj 
+	$(RM)  $(TARGETEXE) *.obj *.ilk *.pdb
 	@echo  "Done." 
 
 .PHONY: clean all
