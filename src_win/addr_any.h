@@ -1,11 +1,14 @@
-﻿//通过符号文件获取函数地址
- 
+﻿#ifndef __ADDR_ANY_H__
+#define __ADDR_ANY_H__
+
 #include <windows.h>
 #include <stdio.h>
 #include <Dbghelp.h>
 #include <tchar.h>
 #pragma comment(lib,"dbghelp.lib")
- 
+
+//通过符号文件获取函数地址
+
 //注意：需要这两个文件
 //dbghelp.dll	
 //symsrv.dll
@@ -37,7 +40,7 @@ inline ULONG_PTR GetFunctionAddressPDB(HMODULE hMod, const CHAR * szApiName)
 }
  
 //符号获取函数地址
-inline PVOID SymGetProcAddress(LPCSTR szDllName, LPCSTR szApiName)
+inline PVOID SymGetProcAddress(LPCSTR szDllName, LPCSTR szApiName, BOOL bSearchLocal)
 {
 	//变量定义
 	CHAR symbolPath[0x2000] = { 0 };
@@ -63,11 +66,13 @@ inline PVOID SymGetProcAddress(LPCSTR szDllName, LPCSTR szApiName)
 	{
 		return NULL;
 	}
-	symbolPath[0x2000] = { 0 };
-	GetCurrentDirectory(sizeof(symbolPath),symbolPath);
-	SymSetSearchPath(hProcess,symbolPath);
- 
- 
+	
+	if(bSearchLocal == TRUE)
+	{
+		symbolPath[0x2000] = { 0 };
+		GetCurrentDirectory(sizeof(symbolPath),symbolPath);
+		SymSetSearchPath(hProcess,symbolPath);
+ 	}
  
 	HMODULE hDll = GetModuleHandle(szDllName);
 	PVOID lpRet = NULL;
@@ -77,5 +82,6 @@ inline PVOID SymGetProcAddress(LPCSTR szDllName, LPCSTR szApiName)
 	return lpRet;
 }
  
- 
+ #endif
+
  
