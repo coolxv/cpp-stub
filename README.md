@@ -3,8 +3,8 @@
 **说明：**
 - stub.h(适用windows、linux)相关方法基于C++03;使用Inline Hook方式;主要完成桩函数替换功能（参考：[http://jbremer.org/x86-api-hooking-demystified/#ah-other-2](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries)）
 - addr_pri.h(适用windows、linux)相关方法基于C++11;主要完成类的私有函数地址获取（参考：[https://github.com/martong/access_private](https://github.com/martong/access_private)）
-- src_linux/addr_any.h(只适用linux) 相关方法基于C++11,使用elfio库查询符号表(也可以使用bfd解析，centos:binutils-devel);主要完成任意形式函数地址获取（参考：[https://github.com/serge1/ELFIO](https://github.com/serge1/ELFIO)）
-- src_win/addr_any.h(只适用windows) 相关方法基于C++11,使用dbghelp库查询pdb文件的符号表;主要完成任意形式函数地址获取（参考：[https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files](https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files)、[http://www.debuginfo.com/examples/dbghelpexamples.html](http://www.debuginfo.com/examples/dbghelpexamples.html)）
+- src_linux/addr_any.h(只适用linux) 相关方法基于C++11,使用elfio库查询符号表(也可以使用bfd解析，centos:binutils-devel);主要完成任意形式函数地址获取（参考：[https://github.com/serge1/ELFIO](https://github.com/serge1/ELFIO)、[https://sourceware.org/binutils/docs/bfd/](https://sourceware.org/binutils/docs/bfd/)）
+- src_win/addr_any.h(只适用windows) 相关方法基于C++11,使用dbghelp库查询pdb文件的符号表(也可使用pe库解析导出符号);主要完成任意形式函数地址获取（参考：[https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files](https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files)、[http://www.debuginfo.com/examples/dbghelpexamples.html](http://www.debuginfo.com/examples/dbghelpexamples.html)、[http://www.pelib.com/index.php](http://www.pelib.com/index.php)）
 - 只适用x86、x64架构
 - windows和linux的用法会稍微不同，原因是获取不同类型函数地址的方法不同，且调用约定有时不一样
 
