@@ -5,8 +5,8 @@ CC = cl.exe
 LINK = link.exe 
 RM = del 
 #
-CPPFLAGS = /nologo /D  "WIN32" /Od /c /EHsc /I..\src /I..\src_win 
-LDFLAGS = /nologo /DEBUG:FULL
+CPPFLAGS = /nologo /D  "WIN32" /Od /c /EHsc /Z7 /I..\src /I..\src_win 
+LDFLAGS = /nologo /DEBUG:FULL /MAP
 INC = /I..\src /I..\src_win 
 #
 SRCS_CXX = test_private_member_function_win.cpp\
@@ -33,7 +33,7 @@ $(TARGET): $(OBJS_CXX)
 
 clean: 
 	@echo  "Cleaning..." 
-	$(RM)  $(TARGETEXE) *.obj *.ilk *.pdb
+	$(RM)  $(TARGETEXE) *.obj *.ilk *.pdb *.map
 	@echo  "Done." 
 
 .PHONY: clean all
