@@ -1,4 +1,7 @@
 
+打桩主要涉及两点：
+- 第一如何获取原函数地址(addr_pri.h、addr_any.h、常规获取方法参考例子)
+- 第二如何用桩函数替换原函数(stub.h)
 
 **说明：**
 - stub.h(适用windows、linux)相关方法基于C++03;使用Inline Hook方式;主要完成桩函数替换功能（参考：[http://jbremer.org/x86-api-hooking-demystified/#ah-other-2](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries)）
