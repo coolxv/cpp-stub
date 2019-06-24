@@ -19,3 +19,6 @@
 [submodule "other/funchook"]
 	path = other/funchook
 	url = https://github.com/kubo/funchook.git
+[submodule "other/distormx"]
+	path = other/distormx
+	url = https://github.com/gdabah/distormx.git
