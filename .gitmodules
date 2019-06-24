@@ -16,3 +16,6 @@
 [submodule "src_win/pelib"]
 	path = src_win/pelib
 	url = https://github.com/avast/pelib.git
+[submodule "other/funchook"]
+	path = other/funchook
+	url = https://github.com/kubo/funchook.git
