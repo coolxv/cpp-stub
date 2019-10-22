@@ -143,12 +143,14 @@ public:
         if(pstub->far_jmp)
         {
             //13 byte
+            //movabs $0x102030405060708,%r11
+            //jmpq   *%r11
             *(unsigned char*)fn = 0x49;
             *((unsigned char*)fn + 1) = 0xbb;
             *(unsigned long long *)((unsigned char *)fn + 2) = (unsigned long long)fn_stub;
             *(unsigned char *)((unsigned char *)fn + 10) = 0x41;
-            *(unsigned char *)((unsigned char *)fn + 11) = 0x53;
-            *(unsigned char *)((unsigned char *)fn + 12) = 0xc3;
+            *(unsigned char *)((unsigned char *)fn + 11) = 0xff;
+            *(unsigned char *)((unsigned char *)fn + 12) = 0xe3;
         }
         else
         {
