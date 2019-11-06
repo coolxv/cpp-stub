@@ -1,5 +1,5 @@
 
-Piling mainly involves two points:
+**Piling mainly involves two points**
 - How to get the original function address (addr_pri.h,addr_any.h,c++ method of obtaining an address)
 - How to replace the original function with stub function (stub.h)
 
@@ -11,13 +11,20 @@ Piling mainly involves two points:
 - Only for x86, x64 architecture
 - The usage of windows and linux will be slightly different, because the methods for getting different types of function addresses are different, and the calling conventions are sometimes different.
 
-**Cannot Piling: **
-- Cannot piling the exit function, the compiler has made special optimizations
+**Cannot piling**
+- Can't piling the exit function, the compiler has made special optimizations
 - Can't piling pure virtual functions, pure virtual functions have no address
 - The normal internal function declared by static cannot be piling, and the internal function address is not visible (addr_any.h can be used to get the address)
 
+**Unit test compilation option for linux g++**
+- -fno-access-control
+- -fno-inline
+- -Wno-pmf-conversions
+- -Wl,--allow-multiple-definition
+- -fprofile-arcs
+- -ftest-coverage
 
-
+**Principle of implementation**
 ![](https://github.com/coolxv/cpp-stub/blob/master/pic/intel.png)
 
 ***
@@ -338,7 +345,7 @@ int foo_stub(void* obj,int a)
 int main()
 {
     typedef int (*fptr)(A*,int);
-    fptr A_foo = (fptr)(&A::foo);   //获取虚函数地址
+    fptr A_foo = (fptr)(&A::foo);   //obtaining an address
     Stub stub;
     stub.set(A_foo, foo_stub);
     A a;
@@ -349,7 +356,7 @@ int main()
 ```
 
 ```
-//for windows x86(32位)
+//for windows x86
 #include<iostream>
 #include "stub.h"
 using namespace std;
@@ -386,18 +393,18 @@ int main()
 ```
 
 ```
-//for windows x64(64位)，VS编译器不支持内嵌汇编。有解决方案自行搜索。
+//for windows x64, the visual studio compiler does not support inline assembly. There are solutions to search for yourself.
 ```
 
 ## inline function
 
 ```
 //for linux
-//添加-fno-inline编译选项，禁止内联，能获取到函数地址，打桩参考上面。
+//Add the -fno-inline compile option, disable inlining, get the function address.
 ```
 ```
 //for windows
-//添加/Ob0禁用内联展开。
+//Add /Ob0 to disable inline expansion.
 ```
 
 
@@ -405,8 +412,6 @@ int main()
 
 ```
 //for linux
-//被测代码添加-fno-access-private编译选项，禁用访问权限控制，成员函数都为公有的
-//无源码的动态库或静态库无法自己编译，需要特殊技巧获取函数地址
 #include<iostream>
 #include "stub.h"
 #include "addr_pri.h"
