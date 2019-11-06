@@ -1,29 +1,29 @@
 
-打桩主要涉及两点：
-- 第一如何获取原函数地址(addr_pri.h、addr_any.h、常规获取方法参考例子)
-- 第二如何用桩函数替换原函数(stub.h)
+Piling mainly involves two points:
+- How to get the original function address (addr_pri.h, addr_any.h, regular acquisition method reference example)
+- Second how to replace the original function with stub function (stub.h)
 
 **说明：**
-- stub.h(适用windows、linux)相关方法基于C++03;使用Inline Hook方式;主要完成桩函数替换功能（参考：[http://jbremer.org/x86-api-hooking-demystified/#ah-other-2](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries)）
-- addr_pri.h(适用windows、linux)相关方法基于C++11;主要完成类的私有函数地址获取（参考：[https://github.com/martong/access_private](https://github.com/martong/access_private)）
-- src_linux/addr_any.h(只适用linux) 相关方法基于C++11,使用elfio库查询符号表(也可以使用bfd解析，centos:binutils-devel);主要完成任意形式函数地址获取（参考：[https://github.com/serge1/ELFIO](https://github.com/serge1/ELFIO)、[https://sourceware.org/binutils/docs/bfd/](https://sourceware.org/binutils/docs/bfd/)）
-- src_win/addr_any.h(只适用windows) 相关方法基于C++11,使用dbghelp库查询pdb文件的符号表(也可使用pe库解析导出符号);主要完成任意形式函数地址获取（参考：[https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files](https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files)、[http://www.debuginfo.com/examples/dbghelpexamples.html](http://www.debuginfo.com/examples/dbghelpexamples.html)、[http://www.pelib.com/index.php](http://www.pelib.com/index.php)）
-- 只适用x86、x64架构
-- windows和linux的用法会稍微不同，原因是获取不同类型函数地址的方法不同，且调用约定有时不一样
+- stub.h(Applicable to windows, linux) related methods based on C++03; use inline hook method; mainly complete the stub function replacement function (reference:[http://jbremer.org/x86-api-hooking-demystified/#ah-other-2](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries)）
+- addr_pri.h(Applicable to windows, linux) related methods based on C + + 11; mainly complete the class's private function address acquisition (reference:[https://github.com/martong/access_private](https://github.com/martong/access_private)）
+- src_linux/addr_any.h(only for linux) Related methods based on C++11, use the elfio library to query the symbol table (also use bfd parsing, centos:binutils-devel); mainly complete the arbitrary form function address acquisition (reference:[https://github.com/serge1/ELFIO](https://github.com/serge1/ELFIO)、[https://sourceware.org/binutils/docs/bfd/](https://sourceware.org/binutils/docs/bfd/)）
+- src_win/addr_any.h(Windows only) Related methods based on C++11, use the dbghelp library to query the symbol table of the pdb file (you can also use the pe library to parse the exported symbols); mainly complete the arbitrary form function address acquisition (reference:[https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files](https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files)、[http://www.debuginfo.com/examples/dbghelpexamples.html](http://www.debuginfo.com/examples/dbghelpexamples.html)、[http://www.pelib.com/index.php](http://www.pelib.com/index.php)）
+- Only for x86, x64 architecture
+- The usage of windows and linux will be slightly different, because the methods for getting different types of function addresses are different, and the calling conventions are sometimes different.
 
-**不可以打桩的情况：**
--	不可以对exit函数打桩，编译器做了特殊优化
--	不可以对纯虚函数打桩，纯虚函数没有地址
--	static声明的普通内部函数不能打桩，内部函数地址不可见（可使用addr_any.h来获取地址）
+**Cannot piling: **
+- Cannot piling the exit function, the compiler has made special optimizations
+- Can't piling pure virtual functions, pure virtual functions have no address
+- The normal internal function declared by static cannot be piling, and the internal function address is not visible (addr_any.h can be used to get the address)
 
 
-![](https://github.com/coolxv/cpp-stub/blob/master/pic/mm.png)
+
 ![](https://github.com/coolxv/cpp-stub/blob/master/pic/intel.png)
 
 ***
 
 
-## 普通函数打桩（非static）
+## normal function
 
 ```
 //for linux and windows
@@ -51,7 +51,7 @@ int main()
 }
 
 ```
-## 实例成员函数打桩
+## member function
 
 ```
 //for linux，__cdecl
@@ -119,7 +119,7 @@ int main()
 }
 
 ```
-## 静态成员函数打桩
+## static member function
 
 ```
 //for linux and windows
@@ -152,7 +152,7 @@ int main()
 }
 
 ```
-## 模板函数打桩
+## template function
 
 ```
 //for linux，__cdecl
@@ -223,7 +223,7 @@ int main()
 }
 ```
 
-## 重载函数打桩
+## overload function
 
 ```
 //for linux，__cdecl
@@ -312,7 +312,7 @@ int main()
 }
 ```
 
-## 虚函数打桩
+## virtual function
 
 ```
 //for linux
@@ -389,7 +389,7 @@ int main()
 //for windows x64(64位)，VS编译器不支持内嵌汇编。有解决方案自行搜索。
 ```
 
-## 内联函数打桩
+## inline function
 
 ```
 //for linux
@@ -401,7 +401,7 @@ int main()
 ```
 
 
-## 第三方库私有成员函数打桩,使用addr_pri.h接口
+## private member function(use addr_pri.h)
 
 ```
 //for linux
@@ -530,7 +530,7 @@ int main()
 ```
 
 
-## 静态函数打桩,使用addr_any.h接口
+## static function(addr_any.h)
 ```
 #include <iostream>
 #include <string>
