@@ -24,7 +24,17 @@
 - -fprofile-arcs
 - -ftest-coverage
 
+**Code coverage statistics for linux g++**
+```
+lcov -d build/ -z
+lcov -d build/ -b ../../src1 --no-external -rc lcov_branch_coverage=1 -t ut -c -o ut_1.info
+lcov -d build/ -b ../../src2 --no-external -rc lcov_branch_coverage=1 -t ut -c -o ut_2.info
+lcov -a ut_1.info -a ut_2.info -o ut.info
+genhtml -o report/ --prefix=`pwd` --branch-coverage --function-coverage ut.info
+```
+
 **Principle of implementation**
+
 ![](https://github.com/coolxv/cpp-stub/blob/master/pic/intel.png)
 
 ***
