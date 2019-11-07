@@ -1,5 +1,5 @@
 
-**Piling mainly involves two points**
+**Stub mainly involves two points**
 - How to get the original function address (addr_pri.h,addr_any.h,c++ method of obtaining an address)
 - How to replace the original function with stub function (stub.h)
 
@@ -11,10 +11,10 @@
 - Only for x86, x64 architecture
 - The usage of windows and linux will be slightly different, because the methods for getting different types of function addresses are different, and the calling conventions are sometimes different.
 
-**Cannot piling**
-- Can't piling the exit function, the compiler has made special optimizations
-- Can't piling pure virtual functions, pure virtual functions have no address
-- The normal internal function declared by static cannot be piling, and the internal function address is not visible (addr_any.h can be used to get the address)
+**Cannot stub**
+- Can't stub the exit function, the compiler has made special optimizations
+- Can't stub pure virtual functions, pure virtual functions have no address
+- The normal internal function declared by static cannot be stub, and the internal function address is not visible (addr_any.h can be used to get the address)
 
 **Unit test compilation option for linux g++**
 - -fno-access-control
