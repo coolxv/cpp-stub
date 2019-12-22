@@ -11,6 +11,9 @@
 - Only for x86, x64 architecture
 - The usage of windows and linux will be slightly different, because the methods for getting different types of function addresses are different, and the calling conventions are sometimes different.
 
+**Principle of implementation**
+![](https://github.com/coolxv/cpp-stub/blob/master/pic/intel.png)
+
 **Cannot stub**
 - Can't stub the exit function, the compiler has made special optimizations
 - Can't stub pure virtual functions, pure virtual functions have no address
@@ -49,10 +52,6 @@ lcov -d build/ -b ../../src2 --no-external -rc lcov_branch_coverage=1 -t ut -c -
 lcov -a ut_1.info -a ut_2.info -o ut.info
 genhtml -o report/ --prefix=`pwd` --branch-coverage --function-coverage ut.info
 ```
-
-**Principle of implementation**
-
-![](https://github.com/coolxv/cpp-stub/blob/master/pic/intel.png)
 
 ***
 
