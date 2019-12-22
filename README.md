@@ -16,6 +16,17 @@
 - Can't stub pure virtual functions, pure virtual functions have no address
 - The normal internal function declared by static cannot be stub, and the internal function address is not visible (addr_any.h can be used to get the address)
 
+
+**Unit test framework**
+- gtest、gmock https://github.com/google/googletest
+- cppunit https://github.com/epronk/cppunit
+- catch2 https://github.com/catchorg/Catch2
+- Boost.Test https://github.com/boostorg/test
+- cpputest https://github.com/cpputest/cpputest
+- doctest https://github.com/onqtam/doctest
+- kmtest https://github.com/SergiusTheBest/kmtest
+- trompeloeil https://github.com/rollbear/trompeloeil
+
 **Unit test compilation option for linux g++**
 - -fno-access-control
 - -fno-inline
