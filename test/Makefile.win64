@@ -11,7 +11,6 @@ INC = /I..\src /I..\src_win
 #
 SRCS_CXX = test_private_member_function_win.cpp\
            test_template_function_win.cpp\
-		   test_virtual_function_x86_win.cpp\
 		   test_overload_function_win.cpp\
 		   test_object_member_function_win.cpp\
 		   test_addr_any_win.cpp\

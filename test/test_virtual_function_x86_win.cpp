@@ -1,4 +1,4 @@
-//for windows x86(32位)
+﻿//for windows x86(32位)
 #include<iostream>
 #include "stub.h"
 using namespace std;
