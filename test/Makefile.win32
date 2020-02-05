@@ -10,31 +10,31 @@ LDFLAGS = /nologo /DEBUG:FULL /MAP
 INC = /I..\src /I..\src_win 
 #
 SRCS_CXX = test_private_member_function_win.cpp\
-           test_template_function_win.cpp\
-		   test_virtual_function_x86_win.cpp\
-		   test_overload_function_win.cpp\
-		   test_object_member_function_win.cpp\
-		   test_addr_any_win.cpp\
-		   test_function.cpp\
-		   test_variadic_function.cpp\
-		   test_class_member_function.cpp
+			test_template_function_win.cpp\
+			test_virtual_function_x86_win.cpp\
+			test_overload_function_win.cpp\
+			test_object_member_function_win.cpp\
+			test_addr_any_win.cpp\
+			test_function.cpp\
+			test_variadic_function.cpp\
+			test_class_member_function.cpp
 OBJS_CXX = $(SRCS_CXX:.cpp=.obj) 
 TARGET = $(SRCS_CXX:.cpp=)
 TARGETEXE = $(SRCS_CXX:.cpp=.exe) 
 #
 !MESSAGE begin....
 all: clean  $(TARGET) 
-	@echo  "Done." 
+    @echo  "Done." 
 #compile
 .cpp.obj:: 
-	$(CC) $(INC) $(CPPFLAGS) $< 
+    $(CC) $(INC) $(CPPFLAGS) $< 
 #link
 $(TARGET): $(OBJS_CXX) 
-	$(LINK)  $@.obj  $(LDFLAGS) /OUT:$@.exe 
+    $(LINK)  $@.obj  $(LDFLAGS) /OUT:$@.exe 
 
 clean: 
-	@echo  "Cleaning..." 
-	$(RM)  $(TARGETEXE) *.obj *.ilk *.pdb *.map
-	@echo  "Done." 
+    @echo  "Cleaning..." 
+    $(RM)  $(TARGETEXE) *.obj *.ilk *.pdb *.map
+    @echo  "Done." 
 
 .PHONY: clean all

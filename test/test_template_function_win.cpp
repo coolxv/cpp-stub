@@ -15,10 +15,10 @@ public:
 
 class B {
 public:
-	int foo_stub(int a) {
-		cout << "I am foo_stub" << endl;
-		return 0;
-	}
+    int foo_stub(int a) {
+        cout << "I am foo_stub" << endl;
+        return 0;
+    }
 };
 
 

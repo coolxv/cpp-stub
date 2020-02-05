@@ -15,18 +15,18 @@ public:
     }
 };
 class B{
-	int i;
+    int i;
 public:
-	int foo_stub_int(int a)
-	{
-		cout << "I am foo_stub_int" << a << endl;
-		return 0;
-	}
-	int foo_stub_double(double a)
-	{
-		cout << "I am foo_stub_double" << a << endl;
-		return 0;
-	}
+    int foo_stub_int(int a)
+    {
+        cout << "I am foo_stub_int" << a << endl;
+        return 0;
+    }
+    int foo_stub_double(double a)
+    {
+        cout << "I am foo_stub_double" << a << endl;
+        return 0;
+    }
 };
 int main()
 {

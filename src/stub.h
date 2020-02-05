@@ -42,19 +42,19 @@
 
 //13 byte(jmp m16:64)
 //movabs $0x102030405060708,%r11
-//jmpq	 *%r11
+//jmpq   *%r11
 #define REPLACE_FAR(fn, fn_stub)\
-	*fn = 0x49;\
-	*(fn + 1) = 0xbb;\
-	*(long long *)(fn + 2) = (long long)fn_stub;\
-	*(fn + 10) = 0x41;\
-	*(fn + 11) = 0xff;\
-	*(fn + 12) = 0xe3;
+    *fn = 0x49;\
+    *(fn + 1) = 0xbb;\
+    *(long long *)(fn + 2) = (long long)fn_stub;\
+    *(fn + 10) = 0x41;\
+    *(fn + 11) = 0xff;\
+    *(fn + 12) = 0xe3;
 
 //5 byte(jmp rel32)
 #define REPLACE_NEAR(fn, fn_stub)\
-	*fn = 0xE9;\
-	*(int *)(fn + 1) = (int)(fn_stub - fn - CODESIZE_MIN);
+    *fn = 0xE9;\
+    *(int *)(fn + 1) = (int)(fn_stub - fn - CODESIZE_MIN);
 
 
 struct func_stub
@@ -97,26 +97,26 @@ public:
 #endif       
             {
 
-	            if(pstub->far_jmp)
-	            {
-	                memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
-	            }
-	            else
-	            {
-	                memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
-	            }
+                if(pstub->far_jmp)
+                {
+                    memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
+                }
+                else
+                {
+                    memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
+                }
 
 #ifdef _WIN32
-	            VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect);
+                VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect);
 #else
-	            mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC);
+                mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC);
 #endif     
             }
 
             iter->second  = NULL;
             delete pstub;        
         }
-		
+        
         return;
     }
     template<typename T,typename S>
@@ -154,11 +154,11 @@ public:
 
         if(pstub->far_jmp)
         {
-        	REPLACE_FAR(fn, fn_stub);
+            REPLACE_FAR(fn, fn_stub);
         }
         else
         {
-        	REPLACE_NEAR(fn, fn_stub);
+            REPLACE_NEAR(fn, fn_stub);
         }
 
 
@@ -244,26 +244,26 @@ private:
         return ut._d;
     }
 
-	bool distanceof(char* addr, char* addr_stub)
-	{
-		std::ptrdiff_t diff = addr_stub - addr;
-	
-		if((diff > 0 && diff > 0xffffffff)|| (diff < 0 && -diff > 0xffffffff))
-		{
-			return true;
-		}
-		else 
-		{
-			return false;
-		}
-	}
+    bool distanceof(char* addr, char* addr_stub)
+    {
+        std::ptrdiff_t diff = addr_stub - addr;
+    
+        if((diff > 0 && diff > 0xffffffff)|| (diff < 0 && -diff > 0xffffffff))
+        {
+            return true;
+        }
+        else 
+        {
+            return false;
+        }
+    }
 
 private:
 #ifdef _WIN32
-	//LLP64
+    //LLP64
     long long m_pagesize;
 #else
-	//LP64
+    //LP64
     long m_pagesize;
 #endif   
     std::map<char*, func_stub*> m_result;

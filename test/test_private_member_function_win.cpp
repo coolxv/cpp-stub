@@ -22,11 +22,11 @@ ACCESS_PRIVATE_STATIC_FIELD(A, int, b);
 ACCESS_PRIVATE_STATIC_FUN(A, int(int), bar);
 class B {
 public:
-	int foo_stub(int x)
-	{
-		cout << "I am foo_stub" << endl;
-		return 0;
-	}
+    int foo_stub(int x)
+    {
+        cout << "I am foo_stub" << endl;
+        return 0;
+    }
 };
 int bar_stub(int x)
 {   
