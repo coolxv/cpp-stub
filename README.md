@@ -8,8 +8,10 @@
 - addr_pri.h(for windows, linux) related methods based on C + + 11; mainly complete the class's private function address acquisition (reference:[https://github.com/martong/access_private](https://github.com/martong/access_private)）
 - src_linux/addr_any.h(only for linux) related methods based on C++11, use the elfio library to query the symbol table (also use bfd parsing, centos:binutils-devel); mainly complete the arbitrary form function address acquisition (reference:[https://github.com/serge1/ELFIO](https://github.com/serge1/ELFIO)、[https://sourceware.org/binutils/docs/bfd/](https://sourceware.org/binutils/docs/bfd/)）
 - src_win/addr_any.h(only for windows) related methods based on C++11, use the dbghelp library to query the symbol table of the pdb file (you can also use the pe library to parse the exported symbols); mainly complete the arbitrary form function address acquisition (reference:[https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files](https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files)、[http://www.debuginfo.com/examples/dbghelpexamples.html](http://www.debuginfo.com/examples/dbghelpexamples.html)、[http://www.pelib.com/index.php](http://www.pelib.com/index.php)）
-- Only for x86, x64 architecture
 - The usage of windows and linux will be slightly different, because the methods for getting different types of function addresses are different, and the calling conventions are sometimes different.
+- Supported operating systems  : windows,linux
+- Supported hardware platform  : x86,x86-64
+- Supported compiler           : msvc,gcc
 
 **Principle of implementation**
 ![](https://github.com/coolxv/cpp-stub/blob/master/pic/intel.png)

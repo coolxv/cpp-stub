@@ -3,6 +3,7 @@
 
 
 #ifdef _WIN32 
+//windows
 #include <windows.h>
 #else
 //linux
@@ -13,6 +14,7 @@
 //c
 #include <cstdio>
 #include <cstdlib>
+#include <cstddef>
 #include <climits>
 //c++
 #include <iostream>
@@ -21,34 +23,52 @@
 
 
 
-//base on C++03
+//Supported operating systems  : windows,linux
+//Supported hardware platform  : x86,x86-64
+//Supported compiler           : msvc,gcc
+
+
+#define ADDR(CLASS_NAME,MEMBER_NAME) (&CLASS_NAME::MEMBER_NAME)
+
 /**********************************************************
                   replace function
 **********************************************************/
-#define ADDR(CLASS_NAME,MEMBER_NAME) (&CLASS_NAME::MEMBER_NAME)
-#ifdef __x86_64__
+
+
 #define CODESIZE 13U
 #define CODESIZE_MIN 5U
 #define CODESIZE_MAX CODESIZE
-#else
-#define CODESIZE 5U
-#endif
+
+
+//13 byte(jmp m16:64)
+//movabs $0x102030405060708,%r11
+//jmpq	 *%r11
+#define REPLACE_FAR(fn, fn_stub)\
+	*fn = 0x49;\
+	*(fn + 1) = 0xbb;\
+	*(long long *)(fn + 2) = (long long)fn_stub;\
+	*(fn + 10) = 0x41;\
+	*(fn + 11) = 0xff;\
+	*(fn + 12) = 0xe3;
+
+//5 byte(jmp rel32)
+#define REPLACE_NEAR(fn, fn_stub)\
+	*fn = 0xE9;\
+	*(int *)(fn + 1) = (int)(fn_stub - fn - CODESIZE_MIN);
 
 
 struct func_stub
 {
-    void *fn;
+    char *fn;
     unsigned char code_buf[CODESIZE];
     bool far_jmp;
 };
-
 
 class Stub
 {
 public:
     Stub()
     {
-
 #ifdef _WIN32
         SYSTEM_INFO sys_info;  
         GetSystemInfo(&sys_info);
@@ -64,8 +84,7 @@ public:
     }
     ~Stub()
     {
-        
-        std::map<void*,func_stub*>::iterator iter;
+        std::map<char*,func_stub*>::iterator iter;
         struct func_stub *pstub;
         for(iter=m_result.begin(); iter != m_result.end(); iter++)
         {
@@ -77,45 +96,41 @@ public:
             if (-1 != mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
 #endif       
             {
-#ifdef __x86_64__
-            if(pstub->far_jmp)
-            {
-                memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
-            }
-            else
-            {
-                memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
-            }
-#else
-            memcpy(pstub->fn, pstub->code_buf, CODESIZE);
-#endif
+
+	            if(pstub->far_jmp)
+	            {
+	                memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
+	            }
+	            else
+	            {
+	                memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
+	            }
+
 #ifdef _WIN32
-            VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect);
+	            VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect);
 #else
-            mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC);
+	            mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC);
 #endif     
             }
 
             iter->second  = NULL;
             delete pstub;        
-            
         }
-
+		
         return;
-
     }
     template<typename T,typename S>
     void set(T addr, S addr_stub)
     {
-        void * fn;
-        void * fn_stub;
+        char * fn;
+        char * fn_stub;
         fn = addrof(addr);
         fn_stub = addrof(addr_stub);
         struct func_stub *pstub;
         pstub = new func_stub;
         //start
         pstub->fn = fn;
-#ifdef __x86_64__
+
         if(distanceof(fn, fn_stub))
         {
             pstub->far_jmp = true;
@@ -126,9 +141,7 @@ public:
             pstub->far_jmp = false;
             memcpy(pstub->code_buf, fn, CODESIZE_MIN);
         }
-#else
-        memcpy(pstub->code_buf, fn, CODESIZE);
-#endif
+
 #ifdef _WIN32
         DWORD lpflOldProtect;
         if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READWRITE, &lpflOldProtect))
@@ -136,36 +149,17 @@ public:
         if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
 #endif       
         {
-            throw("stub set mprotect to w+r+x faild");
+            throw("stub set memory protect to w+r+x faild");
         }
 
-#ifdef __x86_64__
         if(pstub->far_jmp)
         {
-            //13 byte
-            //movabs $0x102030405060708,%r11
-            //jmpq   *%r11
-            *(unsigned char*)fn = 0x49;
-            *((unsigned char*)fn + 1) = 0xbb;
-            *(unsigned long long *)((unsigned char *)fn + 2) = (unsigned long long)fn_stub;
-            *(unsigned char *)((unsigned char *)fn + 10) = 0x41;
-            *(unsigned char *)((unsigned char *)fn + 11) = 0xff;
-            *(unsigned char *)((unsigned char *)fn + 12) = 0xe3;
+        	REPLACE_FAR(fn, fn_stub);
         }
         else
         {
-            //5 byte
-            *(unsigned char *)fn = (unsigned char)0xE9;
-            *(unsigned int *)((unsigned char *)fn + 1) = (unsigned char *)fn_stub - (unsigned char *)fn - CODESIZE_MIN;
+        	REPLACE_NEAR(fn, fn_stub);
         }
-#else
-         //5 byte
-         *(unsigned char *)fn = (unsigned char)0xE9;
-         *(unsigned int *)((unsigned char *)fn + 1) = (unsigned char *)fn_stub - (unsigned char *)fn - CODESIZE;
-#endif
-
-
-
 
 
 #ifdef _WIN32
@@ -174,19 +168,19 @@ public:
         if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC))
 #endif     
         {
-            throw("stub set mprotect to r+x failed");
+            throw("stub set memory protect to r+x failed");
         }
-        m_result.insert(std::pair<void*,func_stub*>(fn,pstub));
+        m_result.insert(std::pair<char*,func_stub*>(fn,pstub));
         return;
     }
 
     template<typename T>
     void reset(T addr)
     {
-        void * fn;
+        char * fn;
         fn = addrof(addr);
         
-        std::map<void*,func_stub*>::iterator iter = m_result.find(fn);
+        std::map<char*,func_stub*>::iterator iter = m_result.find(fn);
         
         if (iter == m_result.end())
         {
@@ -202,9 +196,9 @@ public:
         if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
 #endif       
         {
-            throw("stub reset mprotect to w+r+x faild");
+            throw("stub reset memory protect to w+r+x faild");
         }
-#ifdef __x86_64__
+
         if(pstub->far_jmp)
         {
             memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
@@ -213,9 +207,7 @@ public:
         {
             memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
         }
-#else
-        memcpy(pstub->fn, pstub->code_buf, CODESIZE);
-#endif
+
 
 #ifdef _WIN32
         if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect))
@@ -223,7 +215,7 @@ public:
         if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC))
 #endif     
         {
-            throw("stub reset mprotect to r+x failed");
+            throw("stub reset memory protect to r+x failed");
         }
         m_result.erase(iter);
         delete pstub;
@@ -231,50 +223,50 @@ public:
         return;
     }
 private:
-    void *pageof(const void* p)
+    char *pageof(char* addr)
     { 
 #ifdef _WIN32
-        return (void *)((unsigned long long)p & ~(m_pagesize - 1));
+        return (char *)((unsigned long long)addr & ~(m_pagesize - 1));
 #else
-        return (void *)((unsigned long)p & ~(m_pagesize - 1));
+        return (char *)((unsigned long)addr & ~(m_pagesize - 1));
 #endif   
     }
 
     template<typename T>
-    void* addrof(T src)
+    char* addrof(T addr)
     {
         union 
         {
           T _s;
-          void* _d;
+          char* _d;
         }ut;
-        ut._s = src;
+        ut._s = addr;
         return ut._d;
     }
-#ifdef __x86_64__
-	bool distanceof(void* addr, void* addr_stub)
+
+	bool distanceof(char* addr, char* addr_stub)
 	{
-		unsigned long long addr_tmp = (unsigned long long)addr;
-		unsigned long long addr_stub_tmp = (unsigned long long)addr_stub;
-		unsigned int int_addr_tmp = (unsigned int)(addr_tmp >> 32);
-		unsigned int int_addr_stub_tmp = (unsigned int)(addr_stub_tmp >> 32);
-		if((int_addr_tmp > 0 && int_addr_stub_tmp > 0) || (int_addr_tmp == 0 && int_addr_stub_tmp == 0))
-		{
-			return false;
-		}
-		else 
+		std::ptrdiff_t diff = addr_stub - addr;
+	
+		if((diff > 0 && diff > 0xffffffff)|| (diff < 0 && -diff > 0xffffffff))
 		{
 			return true;
 		}
+		else 
+		{
+			return false;
+		}
 	}
-#endif
+
 private:
 #ifdef _WIN32
+	//LLP64
     long long m_pagesize;
 #else
+	//LP64
     long m_pagesize;
 #endif   
-    std::map<void*, func_stub*> m_result;
+    std::map<char*, func_stub*> m_result;
     
 };
 
