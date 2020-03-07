@@ -1,10 +1,11 @@
+#apt-get install gcc-multilib g++-multilib
 SOURCE = $(filter-out %win.cpp, $(wildcard *.cpp))
 TARGETS = $(patsubst %.cpp, %, $(SOURCE))
 INC=-I../src -I../src_linux
 LIB=-lm
 CC = g++
-CFLAGS =-std=c++11 -Wall -g
- 
+CFLAGS =-std=c++11 -m32 -g -Wall -Wno-unused-function  -Wno-unused-variable -Wno-pmf-conversions
+
 all:$(TARGETS)
  
 $(TARGETS):%:%.cpp

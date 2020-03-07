@@ -246,16 +246,12 @@ private:
 
     bool distanceof(char* addr, char* addr_stub)
     {
-        std::ptrdiff_t diff = addr_stub - addr;
-    
-        if((diff > 0 && diff > 0xffffffff)|| (diff < 0 && -diff > 0xffffffff))
+        std::ptrdiff_t diff = addr_stub >= addr ? addr_stub - addr : addr - addr_stub;
+        if((sizeof(addr) > 4) && (((diff >> 31) - 1) > 0))
         {
             return true;
         }
-        else 
-        {
-            return false;
-        }
+        return false;
     }
 
 private:
