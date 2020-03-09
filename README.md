@@ -11,7 +11,7 @@
 - The usage of windows and linux will be slightly different, because the methods for getting different types of function addresses are different, and the calling conventions are sometimes different.
 - Supported operating systems  : windows,linux
 - Supported hardware platform  : x86,x86-64
-- Supported compiler           : msvc,gcc
+- Supported compiler           : msvc(Getting x86 virtual function addresses is only supported.),gcc,clang(Getting virtual function addresses is not supported.)
 
 **Principle of implementation**
 ![](https://github.com/coolxv/cpp-stub/blob/master/pic/intel.png)
@@ -404,7 +404,7 @@ int main()
 ## virtual function
 
 ```
-//for linux
+//for linux gcc
 #include<iostream>
 #include "stub.h"
 using namespace std;
@@ -476,6 +476,10 @@ int main()
 
 ```
 //for windows x64, the visual studio compiler does not support inline assembly. There are solutions to search for yourself.
+```
+
+```
+//for clang, the clang++ compiler does not support to get virtual function address.
 ```
 
 ## inline function

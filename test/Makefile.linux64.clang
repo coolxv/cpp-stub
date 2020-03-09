@@ -1,0 +1,18 @@
+#sudo apt-get install clang
+#sudo update-alternatives --config clang
+SOURCE = $(filter-out %win.cpp, $(wildcard *.cpp))
+SOURCE := $(filter-out test_virtual_function_linux.cpp, $(SOURCE))
+TARGETS = $(patsubst %.cpp, %, $(SOURCE))
+INC=-I../src -I../src_linux
+LIB=-lm
+CC = clang++
+CFLAGS =-std=c++11 -m64 -g -Wall -Wno-unused-function  -Wno-unused-variable -Wno-unused-private-field
+ 
+all:$(TARGETS)
+ 
+$(TARGETS):%:%.cpp
+	$(CC) $< $(CFLAGS) $(INC) ${LIB}  -o $@
+ 
+.PHONY:clean all
+clean:
+	-rm -rf $(TARGETS)
