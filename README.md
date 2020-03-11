@@ -109,22 +109,6 @@ not implement
 ```
 **The interface use case**
 
-```
-Declaration:
-    ACCESS_PRIVATE_FIELD(ClassName, TypeName, FieldName)
-    ACCESS_PRIVATE_FUN(ClassName, TypeName, FunName)
-    ACCESS_PRIVATE_STATIC_FIELD(ClassName, TypeName, FieldName)
-    ACCESS_PRIVATE_STATIC_FUN(ClassName, TypeName, FunName)
-
-Use:
-    access_private_field::ClassNameFieldName(object);
-    access_private_static_field::ClassName::ClassNameFieldName();
-    call_private_fun::ClassNameFunName(object,parameters...);
-    call_private_static_fun::ClassName::ClassNameFunName(parameters...);
-    get_private_fun::ClassNameFunName();
-    get_private_static_fun::ClassName::ClassNameFunName();
-```
-
 ## normal function
 
 ```
