@@ -7,25 +7,14 @@
 #include <windows.h>
 #else
 //linux
-#include <memory.h>
 #include <unistd.h>
 #include <sys/mman.h>
 #endif
 //c
-#include <cstdio>
-#include <cstdlib>
 #include <cstddef>
-#include <climits>
+#include <cstring>
 //c++
-#include <iostream>
-#include <exception>
 #include <map>
-
-
-
-//Supported operating systems  : windows,linux
-//Supported hardware platform  : x86,x86-64
-//Supported compiler           : msvc,gcc
 
 
 #define ADDR(CLASS_NAME,MEMBER_NAME) (&CLASS_NAME::MEMBER_NAME)
@@ -99,11 +88,11 @@ public:
 
                 if(pstub->far_jmp)
                 {
-                    memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
+                    std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
                 }
                 else
                 {
-                    memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
+                    std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
                 }
 
 #ifdef _WIN32
@@ -134,12 +123,12 @@ public:
         if(distanceof(fn, fn_stub))
         {
             pstub->far_jmp = true;
-            memcpy(pstub->code_buf, fn, CODESIZE_MAX);
+            std::memcpy(pstub->code_buf, fn, CODESIZE_MAX);
         }
         else
         {
             pstub->far_jmp = false;
-            memcpy(pstub->code_buf, fn, CODESIZE_MIN);
+            std::memcpy(pstub->code_buf, fn, CODESIZE_MIN);
         }
 
 #ifdef _WIN32
@@ -201,11 +190,11 @@ public:
 
         if(pstub->far_jmp)
         {
-            memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
+            std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
         }
         else
         {
-            memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
+            std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
         }
 
 

@@ -22,3 +22,6 @@
 [submodule "other/distormx"]
 	path = other/distormx
 	url = https://github.com/gdabah/distormx.git
+[submodule "other/plthook"]
+	path = other/plthook
+	url = https://github.com/kubo/plthook.git

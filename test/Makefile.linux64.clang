@@ -6,9 +6,9 @@ TARGETS = $(patsubst %.cpp, %, $(SOURCE))
 INC=-I../src -I../src_linux
 LIB=-lm
 CC = clang++
-CFLAGS =-std=c++11 -m64 -g -Wall -Wno-unused-function  -Wno-unused-variable -Wno-unused-private-field
+CFLAGS =-std=c++11 -m64 -g -no-pie -fno-stack-protector -Wall -Wno-unused-function  -Wno-unused-variable -Wno-unused-private-field
  
-all:$(TARGETS)
+all:clean $(TARGETS)
  
 $(TARGETS):%:%.cpp
 	$(CC) $< $(CFLAGS) $(INC) ${LIB}  -o $@

@@ -4,22 +4,25 @@
 - How to replace the original function with stub function (stub.h)
 
 **Explanation**
-- stub.h(for windows, linux) related methods based on C++03; use inline hook method; mainly complete the stub function replacement function (reference:[http://jbremer.org/x86-api-hooking-demystified/#ah-other-2](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[https://github.com/3gguan/stub.git](https://github.com/3gguan/stub.git)、[https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries)）
-- addr_pri.h(for windows, linux) related methods based on C + + 11; mainly complete the class's private function address acquisition (reference:[https://github.com/martong/access_private](https://github.com/martong/access_private)）
-- src_linux/addr_any.h(only for linux) related methods based on C++11, use the elfio library to query the symbol table (also use bfd parsing, centos:binutils-devel); mainly complete the arbitrary form function address acquisition (reference:[https://github.com/serge1/ELFIO](https://github.com/serge1/ELFIO)、[https://sourceware.org/binutils/docs/bfd/](https://sourceware.org/binutils/docs/bfd/)）
-- src_win/addr_any.h(only for windows) related methods based on C++11, use the dbghelp library to query the symbol table of the pdb file (you can also use the pe library to parse the exported symbols); mainly complete the arbitrary form function address acquisition (reference:[https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files](https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files)、[http://www.debuginfo.com/examples/dbghelpexamples.html](http://www.debuginfo.com/examples/dbghelpexamples.html)、[http://www.pelib.com/index.php](http://www.pelib.com/index.php)）
+- stub.h(for windows, linux) related methods based on C++98; use inline hook method; mainly completes the function replacement function (reference:[http://jbremer.org/x86-api-hooking-demystified/#ah-other-2](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[https://github.com/3gguan/stub.git](https://github.com/3gguan/stub.git)、[https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries)）
+- addr_pri.h(for windows, linux) related methods based on C++11; mainly completes the class's private function address acquisition (reference:[https://github.com/martong/access_private](https://github.com/martong/access_private)）
+- src_linux/addr_any.h(only for linux) related methods based on C++98, use the elfio library to query the symbol table (also use bfd parsing, centos:binutils-devel); mainly complete the arbitrary form function address acquisition (reference:[https://github.com/serge1/ELFIO](https://github.com/serge1/ELFIO)、[https://sourceware.org/binutils/docs/bfd/](https://sourceware.org/binutils/docs/bfd/)）
+- src_win/addr_any.h(only for windows) related methods based on C++98, use the dbghelp library to query the symbol table of the pdb file (you can also use the pe library to parse the exported symbols); mainly complete the arbitrary form function address acquisition (reference:[https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files](https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files)、[http://www.debuginfo.com/examples/dbghelpexamples.html](http://www.debuginfo.com/examples/dbghelpexamples.html)、[http://www.pelib.com/index.php](http://www.pelib.com/index.php)）
 - The usage of windows and linux will be slightly different, because the methods for getting different types of function addresses are different, and the calling conventions are sometimes different.
-- virtual function addresses: https://itanium-cxx-abi.github.io/cxx-abi/abi.html#vtable
+- Getting virtual function addresses is complicated.Different compilers have different methods of obtaining(reference: [https://itanium-cxx-abi.github.io/cxx-abi/abi.html#vtable(https://itanium-cxx-abi.github.io/cxx-abi/abi.html#vtable)]
 - Supported operating systems  : windows,linux
 - Supported hardware platform  : x86,x86-64
-- Supported compiler           : msvc(Getting x86 virtual function addresses is only supported.),gcc,clang(Getting virtual function addresses is not supported.)
+- Supported compiler           : msvc,gcc,clang
+- Future plans support macOS and ARM
 
 **Principle of implementation**
 ![](https://github.com/coolxv/cpp-stub/blob/master/pic/intel.png)
 
 **Cannot stub**
-- Can't stub the exit function, the compiler has made special optimizations
-- Can't stub pure virtual functions, pure virtual functions have no address
+- Can't stub the exit function, the compiler has made special optimizations.
+- Can't stub pure virtual functions, pure virtual functions not have the address.
+- Can't stub lambda functions, lambda functions not get the address.
+- Can't stub static functions, static function address is not visible.(You can try to use addr_any.h api.)
 - The normal internal function declared by static cannot be stub, and the internal function address is not visible (addr_any.h can be used to get the address)
 
 **Test double**
@@ -44,6 +47,7 @@
 - -fno-inline
 - -Wno-pmf-conversions
 - -Wl,--allow-multiple-definition
+- -no-pie -fno-stack-protector
 - -fprofile-arcs
 - -ftest-coverage
 
@@ -56,8 +60,70 @@ lcov -a ut_1.info -a ut_2.info -o ut.info
 genhtml -o report/ --prefix=`pwd` --branch-coverage --function-coverage ut.info
 ```
 
-***
+**Interface**
 
+## stub.h
+```
+Stub stub
+stub.set(addr, addr_stub)
+stub.reset(addr)
+```
+
+## addr_pri.h
+```
+Declaration:
+    ACCESS_PRIVATE_FIELD(ClassName, TypeName, FieldName)
+    ACCESS_PRIVATE_FUN(ClassName, TypeName, FunName)
+    ACCESS_PRIVATE_STATIC_FIELD(ClassName, TypeName, FieldName)
+    ACCESS_PRIVATE_STATIC_FUN(ClassName, TypeName, FunName)
+
+Use:
+    access_private_field::ClassNameFieldName(object);
+    access_private_static_field::ClassName::ClassNameFieldName();
+    call_private_fun::ClassNameFunName(object,parameters...);
+    call_private_static_fun::ClassName::ClassNameFunName(parameters...);
+    get_private_fun::ClassNameFunName();
+    get_private_static_fun::ClassName::ClassNameFunName();
+```
+
+## addr_any.h(linux)
+```
+AddrAny any //for exe
+AddrAny any(libname) //for lib
+int get_local_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+int get_globle_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+int get_weak_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+
+int get_local_func_addr_dynsym(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+int get_globle_func_addr_dynsym( std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+int get_weak_func_addr_dynsym(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+
+```
+## addr_any.h(windows)
+```
+
+```
+## addr_any.h(darwin)
+```
+not implement
+```
+**The interface use case**
+
+```
+Declaration:
+    ACCESS_PRIVATE_FIELD(ClassName, TypeName, FieldName)
+    ACCESS_PRIVATE_FUN(ClassName, TypeName, FunName)
+    ACCESS_PRIVATE_STATIC_FIELD(ClassName, TypeName, FieldName)
+    ACCESS_PRIVATE_STATIC_FUN(ClassName, TypeName, FunName)
+
+Use:
+    access_private_field::ClassNameFieldName(object);
+    access_private_static_field::ClassName::ClassNameFieldName();
+    call_private_fun::ClassNameFunName(object,parameters...);
+    call_private_static_fun::ClassName::ClassNameFunName(parameters...);
+    get_private_fun::ClassNameFunName();
+    get_private_static_fun::ClassName::ClassNameFunName();
+```
 
 ## normal function
 
@@ -296,10 +362,10 @@ public:
 
 class B {
 public:
-	int foo_stub(int a) {
-		cout << "I am foo_stub" << endl;
-		return 0;
-	}
+    int foo_stub(int a) {
+        cout << "I am foo_stub" << endl;
+        return 0;
+    }
 };
 
 
@@ -377,18 +443,18 @@ public:
     }
 };
 class B{
-	int i;
+    int i;
 public:
-	int foo_stub_int(int a)
-	{
-		cout << "I am foo_stub_int" << a << endl;
-		return 0;
-	}
-	int foo_stub_double(double a)
-	{
-		cout << "I am foo_stub_double" << a << endl;
-		return 0;
-	}
+    int foo_stub_int(int a)
+    {
+        cout << "I am foo_stub_int" << a << endl;
+        return 0;
+    }
+    int foo_stub_double(double a)
+    {
+        cout << "I am foo_stub_double" << a << endl;
+        return 0;
+    }
 };
 int main()
 {
@@ -405,6 +471,7 @@ int main()
 ## virtual function
 
 gcc extension: https://gcc.gnu.org/onlinedocs/gcc/Bound-member-functions.html
+
 ```
 //for linux gcc
 #include<iostream>
@@ -446,33 +513,33 @@ int main()
 using namespace std;
 class A {
 public:
-	virtual int foo(int a) {
-		cout << "I am A_foo" << endl;
-		return 0;
-	}
+    virtual int foo(int a) {
+        cout << "I am A_foo" << endl;
+        return 0;
+    }
 };
 
 class B {
 public:
-	int foo_stub(int a)
-	{
-		cout << "I am foo_stub" << endl;
-		return 0;
-	}
+    int foo_stub(int a)
+    {
+        cout << "I am foo_stub" << endl;
+        return 0;
+    }
 };
 
 
 
 int main()
 {
-	unsigned long addr;
-	_asm {mov eax, A::foo}
-	_asm {mov addr, eax}
-	Stub stub;
-	stub.set(addr, ADDR(B, foo_stub));
-	A a;
-	a.foo(1);
-	return 0;
+    unsigned long addr;
+    _asm {mov eax, A::foo}
+    _asm {mov addr, eax}
+    Stub stub;
+    stub.set(addr, ADDR(B, foo_stub));
+    A a;
+    a.foo(1);
+    return 0;
 }
 ```
 
@@ -490,9 +557,71 @@ int main()
 //for linux
 //Add the -fno-inline compile option, disable inlining, get the function address.
 ```
+
 ```
 //for windows
 //Add /Ob0 to disable inline expansion.
+```
+
+## dynamic library function
+
+
+```
+//for linux
+#include<iostream>
+#include<cstdio>
+#include "stub.h"
+using namespace std;
+int foo(int a)
+{
+    printf("I am foo\n");
+    return 0;
+}
+
+int printf_stub(const char * format, ...)
+{
+    cout<<"I am printf_stub"<<endl;
+    return 0;
+}
+
+
+int main()
+{
+    Stub stub;
+    stub.set(puts, printf_stub);
+    foo(1);
+    return 0;
+}
+
+```
+
+```
+//for windows
+#include<iostream>
+#include<cstdio>
+#include "stub.h"
+using namespace std;
+int foo(int a)
+{
+    printf("I am foo\n");
+    return 0;
+}
+
+int printf_stub(const char * format, ...)
+{
+    cout<<"I am printf_stub"<<endl;
+    return 0;
+}
+
+
+int main()
+{
+    Stub stub;
+    stub.set(printf, printf_stub);
+    foo(1);
+    return 0;
+}
+
 ```
 
 
@@ -584,11 +713,11 @@ ACCESS_PRIVATE_STATIC_FIELD(A, int, b);
 ACCESS_PRIVATE_STATIC_FUN(A, int(int), bar);
 class B {
 public:
-	int foo_stub(int x)
-	{
-		cout << "I am foo_stub" << endl;
-		return 0;
-	}
+    int foo_stub(int x)
+    {
+        cout << "I am foo_stub" << endl;
+        return 0;
+    }
 };
 int bar_stub(int x)
 {   
@@ -623,54 +752,75 @@ int main()
 ```
 
 
-## static function(addr_any.h)
+## static function(use addr_any.h)
+find function address from symbol table
 ```
 //for linux
-#include <iostream>
-#include <string>
-#include <stdio.h>
-
-#include "addr_any.h"
+#include<iostream>
+#include<cstdio>
 #include "stub.h"
+#include "addr_any.h"
 
-//Assuming that function in another file
-static int test_test()
+//This static function can be in another file or in another dynamic library, needed -g -O0 compile
+static int foo()
 {
-    printf("test_test\n");
+    printf("I am foo\n");
     return 0;
 }
 
-static int xxx_stub()
+
+int foo_stub()
 {
-    std::cout << "xxx_stub" << std::endl;
+    std::cout << "I am foo_stub" << std::endl;
     return 0;
 }
+
+int printf_stub(const char * format, ...)
+{
+    std::cout<< "I am printf_stub" << std::endl;
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
-    std::string res;
-    get_exe_pathname(res);
-    std::cout << res << std::endl;
-    unsigned long base_addr;
-    get_lib_pathname_and_baseaddr("libc-2.17.so", res, base_addr);
-    std::cout << res << base_addr << std::endl;
-    std::map<std::string,ELFIO::Elf64_Addr> result;
-    get_weak_func_addr(res, "^puts$", result);
-    
-    test_test();
-
-
-    Stub stub;
-    std::map<std::string,ELFIO::Elf64_Addr>::iterator it;
-    for (it=result.begin(); it!=result.end(); ++it)
+    //Get application static function address
     {
-        stub.set(it->second + base_addr ,xxx_stub);
-        std::cout << it->first << " => " << it->second + base_addr<<std::endl;
-    }
-
-    test_test();
+        AddrAny any;
+        
+        std::map<std::string,ELFIO::Elf64_Addr> result;
+        any.get_local_func_addr_symtab("^foo()$", result);
+        
+        foo();
+        Stub stub;
+        std::map<std::string,ELFIO::Elf64_Addr>::iterator it;
+        for (it=result.begin(); it!=result.end(); ++it)
+        {
+            stub.set(it->second ,foo_stub);
+            std::cout << it->first << " => " << it->second << std::endl;
+        }
+        foo();  
     
+    }
+    //Get dynamic library static function address
+    {
+        AddrAny any("libc-2.27.so");// cat /proc/pid/maps
+        
+        std::map<std::string,ELFIO::Elf64_Addr> result;
+        any.get_weak_func_addr_dynsym("^puts", result);
+        
+        foo();
+        Stub stub;
+        std::map<std::string,ELFIO::Elf64_Addr>::iterator it;
+        for (it=result.begin(); it!=result.end(); ++it)
+        {
+            stub.set(it->second ,printf_stub);
+            std::cout << it->first << " => " << it->second << std::endl;
+        }
+        foo();
+    }
     return 0;
 }
+
 
 ```
 ```
@@ -679,9 +829,9 @@ int main(int argc, char **argv)
 #include "addr_any.h"
 #include "stub.h"
 
+
 using namespace std;
 
-//Assuming that function in another file
 static int foo()
 {
     cout<<"I am foo"<<endl;
@@ -694,27 +844,26 @@ int foo_stub()
     return 0;
 }
 
-
 int _tmain( int argc, const TCHAR* argv[] ) 
 {
+    const TCHAR* pSymName = _T("foo"); 
+    const TCHAR* pFilePdbName =  _T("test_addr_any_win.pdb"); 
+    const TCHAR* pFileExeName =  _T("test_addr_any_win.exe"); 
+    PVOID foo_address = get_func_addr(pFileExeName, pFilePdbName, pSymName);
 
-	const TCHAR* pSymName = _T("foo"); 
-	const TCHAR* pFilePdbName =  _T("test_addr_any_win.pdb"); 
-	const TCHAR* pFileExeName =  _T("test_addr_any_win.exe"); 
-	PVOID foo_address = get_func_addr(pFileExeName, pFilePdbName, pSymName);
-
-	_tprintf( _T("Address: %x  "), foo); 
-
-	_tprintf( _T("Address: %x  "), foo_address); 
-
+    _tprintf( _T("foo address: %x  "), foo); 
+    _tprintf( _T("get foo address: %x  "), foo_address); 
+    
+    foo();
     Stub stub;
     stub.set(foo_address, foo_stub);
     foo();
+    
+    //get address from remote server
+    PVOID mm_address = get_func_addr_by_remote(_T("ntdll.dll"), _T("ZwReadVirtualMemory"));
+    _tprintf( _T("ZwReadVirtualMemory_address: %x  "), mm_address); 
 
-	PVOID mm_address = get_func_addr_by_remote(_T("ntdll.dll"), _T("ZwReadVirtualMemory"));
-	_tprintf( _T("ZwReadVirtualMemory_address: %x  "), mm_address); 
-
-	return 0; 
+    return 0; 
 }
 
 

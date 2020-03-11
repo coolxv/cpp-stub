@@ -1,47 +1,67 @@
-#include <iostream>
-#include <string>
-#include <stdio.h>
-
-#include "addr_any.h"
+#include<iostream>
+#include<cstdio>
 #include "stub.h"
+#include "addr_any.h"
 
 // g++ -g test_addr_any.cpp -std=c++11 -I../src -I../src/elfio/elfio -o test_addr_any
 
-static int test_test()
+//This static function can be in another file or in another dynamic library, needed -g -O0 compile
+static int foo()
 {
-    printf("test_test\n");
+    printf("I am foo\n");
     return 0;
 }
 
-static int xxx_stub()
+
+int foo_stub()
 {
-    std::cout << "xxx_stub" << std::endl;
+    std::cout << "I am foo_stub" << std::endl;
     return 0;
 }
+
+int printf_stub(const char * format, ...)
+{
+    std::cout<< "I am printf_stub" << std::endl;
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
-    std::string res;
-    get_exe_pathname(res);
-    std::cout << res << std::endl;
-    unsigned long base_addr;
-    get_lib_pathname_and_baseaddr("libc-2.17.so", res, base_addr);
-    std::cout << res << base_addr << std::endl;
-    std::map<std::string,ELFIO::Elf64_Addr> result;
-    get_weak_func_addr(res, "^puts$", result);
-    
-    test_test();
-
-
-    Stub stub;
-    std::map<std::string,ELFIO::Elf64_Addr>::iterator it;
-    for (it=result.begin(); it!=result.end(); ++it)
+    //Get application static function address
     {
-        stub.set(it->second + base_addr ,xxx_stub);
-        std::cout << it->first << " => " << it->second + base_addr<<std::endl;
-    }
-
-    test_test();
+        AddrAny any;
+        
+        std::map<std::string,ELFIO::Elf64_Addr> result;
+        any.get_local_func_addr_symtab("^foo()$", result);
+        
+        foo();
+        Stub stub;
+        std::map<std::string,ELFIO::Elf64_Addr>::iterator it;
+        for (it=result.begin(); it!=result.end(); ++it)
+        {
+            stub.set(it->second ,foo_stub);
+            std::cout << it->first << " => " << it->second << std::endl;
+        }
+        foo();  
     
+    }
+    //Get dynamic library static function address
+    {
+        AddrAny any("libc-2.27.so");// cat /proc/pid/maps
+        
+        std::map<std::string,ELFIO::Elf64_Addr> result;
+        any.get_weak_func_addr_dynsym("^puts", result);
+        
+        foo();
+        Stub stub;
+        std::map<std::string,ELFIO::Elf64_Addr>::iterator it;
+        for (it=result.begin(); it!=result.end(); ++it)
+        {
+            stub.set(it->second ,printf_stub);
+            std::cout << it->first << " => " << it->second << std::endl;
+        }
+        foo();
+    }
     return 0;
 }
 
