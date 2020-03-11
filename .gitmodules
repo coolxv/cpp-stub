@@ -13,9 +13,6 @@
 [submodule "other/lief"]
 	path = other/lief
 	url = https://github.com/lief-project/LIEF.git
-[submodule "src_win/pelib"]
-	path = src_win/pelib
-	url = https://github.com/avast/pelib.git
 [submodule "other/funchook"]
 	path = other/funchook
 	url = https://github.com/kubo/funchook.git
@@ -25,3 +22,6 @@
 [submodule "other/plthook"]
 	path = other/plthook
 	url = https://github.com/kubo/plthook.git
+[submodule "other/pelib"]
+	path = other/pelib
+	url = https://github.com/avast/pelib.git
