@@ -23,7 +23,6 @@
 - Can't stub pure virtual functions, pure virtual functions not have the address.
 - Can't stub lambda functions, lambda functions not get the address.
 - Can't stub static functions, static function address is not visible.(You can try to use addr_any.h api.)
-- The normal internal function declared by static cannot be stub, and the internal function address is not visible (addr_any.h can be used to get the address)
 
 **Test double**
 - Dummy objects are passed around but never actually used. Usually they are just used to fill parameter lists.
