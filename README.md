@@ -1,3 +1,4 @@
+[中文(https://github.com/coolxv/cpp-stub/tree/master/doc/README_zh.md)]
 
 **Stub mainly involves two points**
 - How to get the original function address (addr_pri.h,addr_any.h,c++ method of obtaining an address)
