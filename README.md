@@ -1,16 +1,16 @@
-[中文(https://github.com/coolxv/cpp-stub/tree/master/doc/README_zh.md)]
+[中文](https://github.com/coolxv/cpp-stub/tree/master/doc/README_zh.md)
 
 **Stub mainly involves two points**
 - How to get the original function address (addr_pri.h,addr_any.h,c++ method of obtaining an address)
 - How to replace the original function with stub function (stub.h)
 
 **Explanation**
-- stub.h(for windows, linux) related methods based on C++98; use inline hook method; mainly completes the function replacement function (reference:[http://jbremer.org/x86-api-hooking-demystified/#ah-other-2](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[https://github.com/3gguan/stub.git](https://github.com/3gguan/stub.git)、[https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries)）
-- addr_pri.h(for windows, linux) related methods based on C++11; mainly completes the class's private function address acquisition (reference:[https://github.com/martong/access_private](https://github.com/martong/access_private)）
-- src_linux/addr_any.h(only for linux) related methods based on C++98, use the elfio library to query the symbol table (also use bfd parsing, centos:binutils-devel); mainly complete the arbitrary form function address acquisition (reference:[https://github.com/serge1/ELFIO](https://github.com/serge1/ELFIO)、[https://sourceware.org/binutils/docs/bfd/](https://sourceware.org/binutils/docs/bfd/)）
-- src_win/addr_any.h(only for windows) related methods based on C++98, use the dbghelp library to query the symbol table of the pdb file (you can also use the pe library to parse the exported symbols); mainly complete the arbitrary form function address acquisition (reference:[https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files](https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files)、[http://www.debuginfo.com/examples/dbghelpexamples.html](http://www.debuginfo.com/examples/dbghelpexamples.html)、[http://www.pelib.com/index.php](http://www.pelib.com/index.php)）
+- stub.h(for windows, linux) related methods based on C++98; use inline hook method; mainly completes the function replacement function (reference:[x86-api-hooking-demystified](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[stub](https://github.com/3gguan/stub.git)、[Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries))
+- addr_pri.h(for windows, linux) related methods based on C++11; mainly completes the class's private function address acquisition (reference:[access_private](https://github.com/martong/access_private))
+- src_linux/addr_any.h(only for linux) related methods based on C++98, use the elfio library to query the symbol table (also use bfd parsing, centos:binutils-devel); mainly complete the arbitrary form function address acquisition (reference:[ELFIO](https://github.com/serge1/ELFIO)、[bfd](https://sourceware.org/binutils/docs/bfd/))
+- src_win/addr_any.h(only for windows) related methods based on C++98, use the dbghelp library to query the symbol table of the pdb file (you can also use the pe library to parse the exported symbols); mainly complete the arbitrary form function address acquisition (reference:[symbol-files](https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files)、[dbghelpexamples](http://www.debuginfo.com/examples/dbghelpexamples.html)、[pelib](http://www.pelib.com/index.php))
 - The usage of windows and linux will be slightly different, because the methods for getting different types of function addresses are different, and the calling conventions are sometimes different.
-- Getting virtual function addresses is complicated.Different compilers have different methods of obtaining(reference: [https://itanium-cxx-abi.github.io/cxx-abi/abi.html#vtable(https://itanium-cxx-abi.github.io/cxx-abi/abi.html#vtable)]
+- Getting virtual function addresses is complicated.Different compilers have different methods of obtaining(reference: [cxx-abi](https://itanium-cxx-abi.github.io/cxx-abi/abi.html#vtable))
 - Supported operating systems  : windows,linux
 - Supported hardware platform  : x86,x86-64
 - Supported compiler           : msvc,gcc,clang
