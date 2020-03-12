@@ -22,7 +22,7 @@
 - 不能对纯虚函数打桩, 纯虚函数没有地址
 - 不能对 lambda 函数打桩, lambda 函数获取不到地址
 - 不能对静态函数打桩, 静态函数地址不可见.(但可以尝试使用 addr_any.h 接口获取地址)
-- The normal internal function declared by static cannot be stub, and the internal function address is not visible (addr_any.h can be used to get the address)
+
 
 **测试替身(来自网络)**
 - Dummy objects are passed around but never actually used. Usually they are just used to fill parameter lists.
