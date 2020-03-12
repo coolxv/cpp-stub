@@ -4,11 +4,11 @@
 - 如何用桩函数替换原函数
 
 **说明**
-- stub.h(适合 windows, linux) 基于C++98开发; 使用 inline hook 技术; 主要解决函数替换问题 (相关参考:[http://jbremer.org/x86-api-hooking-demystified/#ah-other-2](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[https://github.com/3gguan/stub.git](https://github.com/3gguan/stub.git)、[https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries)）
-- addr_pri.h(适合 windows, linux) 基于C++11开发; 主要解决对象的私有方法地址获取问题 (相关参考:[https://github.com/martong/access_private](https://github.com/martong/access_private)）
-- src_linux/addr_any.h(仅适合 linux) 基于C++98开发; 使用 elfio 库查询ELF格式文件的符号表获取函数的地址 (也可以使用 bfd 库); 主要解决静态函数地址获取问题，前提编译时得包含调试信息 (相关参考:[https://github.com/serge1/ELFIO](https://github.com/serge1/ELFIO)、[https://sourceware.org/binutils/docs/bfd/](https://sourceware.org/binutils/docs/bfd/)）
-- src_win/addr_any.h(仅适合 windows) 基于C++98开发; 使用 dbghelp 库查询PDB文件的符号表获取函数的地址; 主要解决静态函数地址获取问题，前提编译时得包含调试信息 (相关参考:[https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files](https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files)、[http://www.debuginfo.com/examples/dbghelpexamples.html](http://www.debuginfo.com/examples/dbghelpexamples.html)、[http://www.pelib.com/index.php](http://www.pelib.com/index.php)）
-- 使用时linux和windows还是有差别的, 主要涉及桩函数的写法, 还有原函数地址获取的方法不同; 获取虚函数的地址方法就不同，主要是C++ABI不兼容, 编译器支持不同(reference: [https://itanium-cxx-abi.github.io/cxx-abi/abi.html#vtable(https://itanium-cxx-abi.github.io/cxx-abi/abi.html#vtable)]
+- stub.h(适合 windows, linux) 基于C++98开发; 使用 inline hook 技术; 主要解决函数替换问题 (相关参考:[x86-api-hooking-demystified](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[stub](https://github.com/3gguan/stub.git)、[Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries))
+- addr_pri.h(适合 windows, linux) 基于C++11开发; 主要解决对象的私有方法地址获取问题 (相关参考:[access_private](https://github.com/martong/access_private))
+- src_linux/addr_any.h(仅适合 linux) 基于C++98开发; 使用 elfio 库查询ELF格式文件的符号表获取函数的地址 (也可以使用 bfd 库); 主要解决静态函数地址获取问题，前提编译时得包含调试信息 (相关参考:[ELFIO](https://github.com/serge1/ELFIO)、[bfd](https://sourceware.org/binutils/docs/bfd/))
+- src_win/addr_any.h(仅适合 windows) 基于C++98开发; 使用 dbghelp 库查询PDB文件的符号表获取函数的地址; 主要解决静态函数地址获取问题，前提编译时得包含调试信息 (相关参考:[symbol-files](https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files)、[dbghelpexamples](http://www.debuginfo.com/examples/dbghelpexamples.html)、[pelib](http://www.pelib.com/index.php))
+- 使用时linux和windows还是有差别的, 主要涉及桩函数的写法, 还有原函数地址获取的方法不同; 获取虚函数的地址方法就不同，主要是C++ABI不兼容, 编译器支持不同(相关参考: [cxx-abi](https://itanium-cxx-abi.github.io/cxx-abi/abi.html#vtable))
 - 支持的操作系统 : windows,linux
 - 支持的硬件平台 : x86,x86-64
 - 支持的编译器 : msvc,gcc,clang
