@@ -16,6 +16,7 @@ SRCS_CXX = test_private_member_function_win.cpp\
 			test_object_member_function_win.cpp\
 			test_addr_any_win.cpp\
 			test_function.cpp\
+			test_functor_win.cpp\
 			test_dynamic_library_win.cpp\
 			test_variadic_function.cpp\
 			test_class_member_function.cpp
