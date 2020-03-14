@@ -534,6 +534,84 @@ int main()
 //for clang, the clang++ 暂时没找到支持获取虚函数地址的扩展语法
 ```
 
+## 仿函数
+
+
+```
+//for linux gcc
+#include<iostream>
+#include "stub.h"
+using namespace std;
+
+
+class Foo
+{
+public:
+    void operator() (int a)
+    {
+        cout<<"I am foo"<<endl;
+    }
+};
+
+int foo_stub(void* obj, int a)
+{   
+    Foo* o= (Foo*)obj;
+    cout<<"I am foo_stub"<<endl;
+    return 0;
+}
+
+int main()
+{
+    Stub stub;
+    stub.set(ADDR(Foo,operator()), foo_stub);
+    Foo foo;
+    foo(1);
+    return 0;
+}
+
+```
+
+```
+//for windows
+#include<iostream>
+#include "stub.h"
+using namespace std;
+
+
+class Foo
+{
+public:
+    void operator() (int a)
+    {
+        cout<<"I am foo"<<endl;
+    }
+};
+
+class B{
+public:
+    int foo_stub(int a){
+        cout<<"I am foo_stub"<<endl;
+        return 0;
+    }
+};
+int main()
+{
+    Stub stub;
+    stub.set(ADDR(Foo,operator()), ADDR(B,foo_stub));
+    Foo foo;
+    foo(1);
+    return 0;
+}
+
+```
+
+## lambda函数
+
+```
+
+
+```
+
 ## 内联函数
 
 ```
