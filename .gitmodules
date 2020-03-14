@@ -25,3 +25,6 @@
 [submodule "other/pelib"]
 	path = other/pelib
 	url = https://github.com/avast/pelib.git
+[submodule "other/injectorpp"]
+	path = other/injectorpp
+	url = https://github.com/mazong1123/injectorpp.git
