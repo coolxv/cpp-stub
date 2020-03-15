@@ -71,6 +71,7 @@ public:
             m_pagesize = 4096;
         }
     }
+
     ~Stub()
     {
         std::map<char*,func_stub*>::iterator iter;
@@ -78,6 +79,7 @@ public:
         for(iter=m_result.begin(); iter != m_result.end(); iter++)
         {
             pstub = iter->second;
+
 #ifdef _WIN32
             DWORD lpflOldProtect;
             if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READWRITE, &lpflOldProtect))
@@ -85,21 +87,25 @@ public:
             if (-1 != mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
 #endif       
             {
+                throw("stub set memory protect to w+r+x faild");
+            }
 
-                if(pstub->far_jmp)
-                {
-                    std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
-                }
-                else
-                {
-                    std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
-                }
+            if(pstub->far_jmp)
+            {
+                std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
+            }
+            else
+            {
+                std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
+            }
 
 #ifdef _WIN32
-                VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect);
+            if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect))
 #else
-                mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC);
+            if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC))
 #endif     
+            {
+                throw("stub reset memory protect to r+x failed");
             }
 
             iter->second  = NULL;
@@ -108,6 +114,7 @@ public:
         
         return;
     }
+
     template<typename T,typename S>
     void set(T addr, S addr_stub)
     {
@@ -159,6 +166,7 @@ public:
         {
             throw("stub set memory protect to r+x failed");
         }
+
         m_result.insert(std::pair<char*,func_stub*>(fn,pstub));
         return;
     }
@@ -206,11 +214,13 @@ public:
         {
             throw("stub reset memory protect to r+x failed");
         }
+
         m_result.erase(iter);
         delete pstub;
         
         return;
     }
+
 private:
     char *pageof(char* addr)
     { 
