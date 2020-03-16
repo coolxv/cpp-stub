@@ -43,10 +43,6 @@ public:
         return get_func_addr(SHT_SYMTAB, STB_WEAK, func_name_regex_str, result);
     }
     
-    int get_local_func_addr_dynsym(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
-    {
-        return get_func_addr(SHT_DYNSYM, STB_LOCAL, func_name_regex_str, result);
-    }
     int get_globle_func_addr_dynsym( std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
     {
         return get_func_addr(SHT_DYNSYM, STB_GLOBAL, func_name_regex_str, result);

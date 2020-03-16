@@ -94,7 +94,6 @@ int get_local_func_addr_symtab(std::string func_name_regex_str, std::map<std::st
 int get_globle_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
 int get_weak_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
 
-int get_local_func_addr_dynsym(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
 int get_globle_func_addr_dynsym( std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
 int get_weak_func_addr_dynsym(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
 
