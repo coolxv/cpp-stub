@@ -31,12 +31,12 @@ int main(int argc, char **argv)
     {
         AddrAny any;
         
-        std::map<std::string,ELFIO::Elf64_Addr> result;
+        std::map<std::string,void*> result;
         any.get_local_func_addr_symtab("^foo()$", result);
         
         foo();
         Stub stub;
-        std::map<std::string,ELFIO::Elf64_Addr>::iterator it;
+        std::map<std::string,void*>::iterator it;
         for (it=result.begin(); it!=result.end(); ++it)
         {
             stub.set(it->second ,foo_stub);
@@ -49,12 +49,16 @@ int main(int argc, char **argv)
     {
         AddrAny any("libc-2.27.so");// cat /proc/pid/maps
         
-        std::map<std::string,ELFIO::Elf64_Addr> result;
+        std::map<std::string,void*> result;
+#ifdef __clang__ 
+        any.get_global_func_addr_dynsym("^printf$", result);
+#else
         any.get_weak_func_addr_dynsym("^puts", result);
+#endif
         
         foo();
         Stub stub;
-        std::map<std::string,ELFIO::Elf64_Addr>::iterator it;
+        std::map<std::string,void*>::iterator it;
         for (it=result.begin(); it!=result.end(); ++it)
         {
             stub.set(it->second ,printf_stub);

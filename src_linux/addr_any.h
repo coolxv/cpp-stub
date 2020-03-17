@@ -11,6 +11,7 @@
 #include <cstdlib>
 
 //c++
+#include <string>
 #include <map>
 //project
 #include "elfio/elfio/elfio.hpp"
@@ -30,24 +31,24 @@ public:
         m_init = get_lib_pathname_and_baseaddr(libname, m_fullname, m_baseaddr);
     }
 
-    int get_local_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+    int get_local_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,void*>& result)
     {
         return get_func_addr(SHT_SYMTAB, STB_LOCAL, func_name_regex_str, result);
     }
-    int get_globle_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+    int get_global_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,void*>& result)
     {
         return get_func_addr(SHT_SYMTAB, STB_GLOBAL, func_name_regex_str, result);
     }
-    int get_weak_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+    int get_weak_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,void*>& result)
     {
         return get_func_addr(SHT_SYMTAB, STB_WEAK, func_name_regex_str, result);
     }
     
-    int get_globle_func_addr_dynsym( std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+    int get_global_func_addr_dynsym( std::string func_name_regex_str, std::map<std::string,void*>& result)
     {
         return get_func_addr(SHT_DYNSYM, STB_GLOBAL, func_name_regex_str, result);
     }
-    int get_weak_func_addr_dynsym(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+    int get_weak_func_addr_dynsym(std::string func_name_regex_str, std::map<std::string,void*>& result)
     {
         return get_func_addr(SHT_DYNSYM, STB_WEAK, func_name_regex_str, result);
     }
@@ -202,7 +203,7 @@ private:
 
     }
 
-    int get_func_addr(unsigned int ttype, unsigned int stype, std::string& func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+    int get_func_addr(unsigned int ttype, unsigned int stype, std::string& func_name_regex_str, std::map<std::string,void*>& result)
     {
         // Create an elfio reader
         ELFIO::elfio reader;
@@ -249,7 +250,7 @@ private:
                         {
                             if (0 == regexec(&pathname_regex, name_mangle.c_str(), 0, NULL, 0))
                             {
-                                  result.insert ( std::pair<std::string,ELFIO::Elf64_Addr>(name_mangle,value + m_baseaddr));
+                                  result.insert ( std::pair<std::string,void *>(name_mangle,(void*)(value + m_baseaddr)));
                                   count++;
                             }
                         }
@@ -257,7 +258,7 @@ private:
                         {
                             if (0 == regexec(&pathname_regex, name.c_str(), 0, NULL, 0))
                             {
-                                  result.insert ( std::pair<std::string,ELFIO::Elf64_Addr>(name,value + m_baseaddr));
+                                  result.insert ( std::pair<std::string,void *>(name,(void*)(value + m_baseaddr)));
                                   count++;
                             }
                         }

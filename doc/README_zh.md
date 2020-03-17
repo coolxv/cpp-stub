@@ -89,17 +89,18 @@ Use:
 ```
 AddrAny any //for exe
 AddrAny any(libname) //for lib
-int get_local_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
-int get_globle_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
-int get_weak_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+int get_local_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,void*>& result)
+int get_global_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,void*>& result)
+int get_weak_func_addr_symtab(std::string func_name_regex_str, std::map<std::string,void*>& result)
 
-int get_globle_func_addr_dynsym( std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
-int get_weak_func_addr_dynsym(std::string func_name_regex_str, std::map<std::string,ELFIO::Elf64_Addr>& result)
+int get_global_func_addr_dynsym( std::string func_name_regex_str, std::map<std::string,void*>& result)
+int get_weak_func_addr_dynsym(std::string func_name_regex_str, std::map<std::string,void*>& result)
 
 ```
 ## addr_any.h(windows)
 ```
-
+AddrAny any //for all
+int get_func_addr(std::string func_name, std::map<std::string,void*>& result)
 ```
 ## addr_any.h(darwin)
 ```
@@ -847,12 +848,12 @@ int main(int argc, char **argv)
     {
         AddrAny any;
         
-        std::map<std::string,ELFIO::Elf64_Addr> result;
+        std::map<std::string,void*> result;
         any.get_local_func_addr_symtab("^foo()$", result);
         
         foo();
         Stub stub;
-        std::map<std::string,ELFIO::Elf64_Addr>::iterator it;
+        std::map<std::string,void*>::iterator it;
         for (it=result.begin(); it!=result.end(); ++it)
         {
             stub.set(it->second ,foo_stub);
@@ -865,12 +866,16 @@ int main(int argc, char **argv)
     {
         AddrAny any("libc-2.27.so");// cat /proc/pid/maps
         
-        std::map<std::string,ELFIO::Elf64_Addr> result;
+        std::map<std::string,void*> result;
+#ifdef __clang__ 
+        any.get_global_func_addr_dynsym("^printf$", result);
+#else
         any.get_weak_func_addr_dynsym("^puts", result);
+#endif
         
         foo();
         Stub stub;
-        std::map<std::string,ELFIO::Elf64_Addr>::iterator it;
+        std::map<std::string,void*>::iterator it;
         for (it=result.begin(); it!=result.end(); ++it)
         {
             stub.set(it->second ,printf_stub);
@@ -885,46 +890,103 @@ int main(int argc, char **argv)
 ```
 ```
 //for windows
-#define __ADDR_ANY_DEBUG__
-#include "addr_any.h"
+#include<iostream>
+#include<cstdio>
 #include "stub.h"
-
+#include "addr_any.h"
 
 using namespace std;
 
 static int foo()
 {
-    cout<<"I am foo"<<endl;
+    printf("I am foo\n");
     return 0;
 }
 
 int foo_stub()
-{   
-    cout<<"I am foo_stub"<<endl;
+{
+    std::cout << "I am foo_stub" << std::endl;
     return 0;
 }
 
-int _tmain( int argc, const TCHAR* argv[] ) 
+int printf_stub(const char * format, ...)
 {
-    const TCHAR* pSymName = _T("foo"); 
-    const TCHAR* pFilePdbName =  _T("test_addr_any_win.pdb"); 
-    const TCHAR* pFileExeName =  _T("test_addr_any_win.exe"); 
-    PVOID foo_address = get_func_addr(pFileExeName, pFilePdbName, pSymName);
+    std::cout<< "I am printf_stub" << std::endl;
+    return 0;
+}
 
-    _tprintf( _T("foo address: %x  "), foo); 
-    _tprintf( _T("get foo address: %x  "), foo_address); 
+int main(int argc, char **argv)
+{
+    //Get application static function address
+    {
+        AddrAny any;
+        int main(int argc, char **argv)
+{
+
+    //Get application static function address
+    {
+        AddrAny any;
+        
+        std::map<std::string,void*> result;
+        any.get_func_addr("foo", result);
+        
+        foo();
+        Stub stub;
+        std::map<std::string,void*>::iterator it;
+        for (it=result.begin(); it!=result.end(); ++it)
+        {
+            stub.set(it->second ,foo_stub);
+            std::cout << it->first << " => " << it->second << std::endl;
+        }
+        foo();  
     
-    foo();
-    Stub stub;
-    stub.set(foo_address, foo_stub);
-    foo();
-    
-    //get address from remote server
-    PVOID mm_address = get_func_addr_by_remote(_T("ntdll.dll"), _T("ZwReadVirtualMemory"));
-    _tprintf( _T("ZwReadVirtualMemory_address: %x  "), mm_address); 
+    }
+    //Get dynamic library static function address
+    {
+        AddrAny any;
+        
+        std::map<std::string,void*> result;
+        any.get_func_addr("printf", result);
+
+        
+        foo();
+        Stub stub;
+        std::map<std::string,void*>::iterator it;
+        for (it=result.begin(); it!=result.end(); ++it)
+        {
+            stub.set(it->second ,printf_stub);
+            std::cout << it->first << " => " << it->second << std::endl;
+        }
+        foo();
+    }
+    return 0;
+
+}
+
+        PVOID addr = any.get_func_addr("foo");
+        
+        foo();
+        Stub stub;
+        stub.set(addr ,foo_stub);
+        foo();
+        //stub.reset(addr);
+        //foo();
+    }
+    //Get dynamic library static function address
+    {
+        AddrAny any;
+        
+        PVOID addr = any.get_func_addr("printf");
+        
+        foo();
+        Stub stub;
+        stub.set(addr ,printf_stub);
+        foo();
+        //stub.reset(addr);
+        //foo();
+    }
 
     return 0; 
 }
-
 
 ```

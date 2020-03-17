@@ -1,4 +1,3 @@
-#define __ADDR_ANY_DEBUG__
 #include<iostream>
 #include<cstdio>
 #include "stub.h"
@@ -8,37 +7,63 @@ using namespace std;
 
 static int foo()
 {
-    cout<<"I am foo"<<endl;
+    printf("I am foo\n");
     return 0;
 }
 
 int foo_stub()
-{   
-    cout<<"I am foo_stub"<<endl;
+{
+    std::cout << "I am foo_stub" << std::endl;
     return 0;
 }
 
-
-int _tmain( int argc, const TCHAR* argv[] ) 
+int printf_stub(const char * format, ...)
 {
-    const TCHAR* pSymName = _T("foo"); 
-    const TCHAR* pFilePdbName =  _T("test_addr_any_win.pdb"); 
-    const TCHAR* pFileExeName =  _T("test_addr_any_win.exe"); 
-    PVOID foo_address = get_func_addr(pFileExeName, pFilePdbName, pSymName);
+    std::cout<< "I am printf_stub" << std::endl;
+    return 0;
+}
 
-    _tprintf( _T("foo address: %x  "), foo); 
-    _tprintf( _T("get foo address: %x  "), foo_address); 
-    
-    foo();
-    Stub stub;
-    stub.set(foo_address, foo_stub);
-    foo();
-    
-    //get address from remote server
-    PVOID mm_address = get_func_addr_by_remote(_T("ntdll.dll"), _T("ZwReadVirtualMemory"));
-    _tprintf( _T("ZwReadVirtualMemory_address: %x  "), mm_address); 
+int main(int argc, char **argv)
+{
 
-    return 0; 
+    //Get application static function address
+    {
+        AddrAny any;
+        
+        std::map<std::string,void*> result;
+        any.get_func_addr("foo", result);
+        
+        foo();
+        Stub stub;
+        std::map<std::string,void*>::iterator it;
+        for (it=result.begin(); it!=result.end(); ++it)
+        {
+            stub.set(it->second ,foo_stub);
+            std::cout << it->first << " => " << it->second << std::endl;
+        }
+        foo();  
+    
+    }
+    //Get dynamic library static function address
+    {
+        AddrAny any;
+        
+        std::map<std::string,void*> result;
+        any.get_func_addr("printf", result);
+
+        
+        foo();
+        Stub stub;
+        std::map<std::string,void*>::iterator it;
+        for (it=result.begin(); it!=result.end(); ++it)
+        {
+            stub.set(it->second ,printf_stub);
+            std::cout << it->first << " => " << it->second << std::endl;
+        }
+        foo();
+    }
+    return 0;
+
 }
 
 
