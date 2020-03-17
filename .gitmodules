@@ -31,3 +31,6 @@
 [submodule "other/dyninst"]
 	path = other/dyninst
 	url = https://github.com/dyninst/dyninst.git
+[submodule "other/whale"]
+	path = other/whale
+	url = https://github.com/asLody/whale.git
