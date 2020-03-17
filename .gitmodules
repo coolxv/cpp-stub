@@ -28,3 +28,6 @@
 [submodule "other/injectorpp"]
 	path = other/injectorpp
 	url = https://github.com/mazong1123/injectorpp.git
+[submodule "other/dyninst"]
+	path = other/dyninst
+	url = https://github.com/dyninst/dyninst.git
