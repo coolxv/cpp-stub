@@ -17,7 +17,7 @@
 - Future plans support macOS and ARM
 
 **Principle of implementation**
-![](https://github.com/coolxv/cpp-stub/blob/master/pic/intel.png)
+![](pic/intel.png)
 
 **Cannot stub**
 - Can't stub the exit function, the compiler has made special optimizations.

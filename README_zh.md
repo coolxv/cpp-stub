@@ -16,7 +16,7 @@
 - 未来计划支持 macOS 和 ARM
 
 **原理**
-![](https://github.com/coolxv/cpp-stub/blob/master/pic/intel.png)
+![](pic/intel.png)
 
 **不能打桩**
 - 不能对 exit 函数打桩,编译器做优化了
