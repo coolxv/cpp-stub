@@ -1,4 +1,4 @@
-[中文](doc/README_zh.md)|[English](doc/README.md)
+[中文](README_zh.md)|[English](README.md)
 
 **打桩主要涉及两方面问题**
 - 如何获取原函数的地址

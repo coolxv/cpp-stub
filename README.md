@@ -1,4 +1,4 @@
-[中文](doc/README_zh.md)|[English](doc/README.md)
+[中文](README_zh.md)|[English](README.md)
 
 **Stub mainly involves two points**
 - How to get the original function address (addr_pri.h,addr_any.h,c++ method of obtaining an address)
