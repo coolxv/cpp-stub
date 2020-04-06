@@ -13,3 +13,6 @@ The framework is well documented at:
  * Test mock
  * Test stub
 
+## Reference
+
+ https://github.com/KanoComputing/googletest-sample
