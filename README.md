@@ -1,10 +1,11 @@
 [中文](README_zh.md)|[English](README.md)
 
-**Stub mainly involves two points**
-- How to get the original function address (addr_pri.h,addr_any.h,c++ method of obtaining an address)
+# Principle
+## Two core points
+- How to get the original function address (addr_pri.h, addr_any.h)
 - How to replace the original function with stub function (stub.h)
 
-**Explanation**
+## Some notes
 - stub.h(for windows, linux) related methods based on C++98; use inline hook method; mainly completes the function replacement function (reference:[x86-api-hooking-demystified](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[stub](https://github.com/3gguan/stub.git)、[Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries))
 - addr_pri.h(for windows, linux) related methods based on C++11; mainly completes the class's private function address acquisition (reference:[access_private](https://github.com/martong/access_private))
 - src_linux/addr_any.h(only for linux) related methods based on C++98, use the elfio library to query the symbol table (also use bfd parsing, centos:binutils-devel); mainly complete the arbitrary form function address acquisition (reference:[ELFIO](https://github.com/serge1/ELFIO)、[bfd](https://sourceware.org/binutils/docs/bfd/))
@@ -16,23 +17,25 @@
 - Supported compiler           : msvc,gcc,clang
 - Future plans support macOS and ARM
 
-**Principle of implementation**
+## X86/X64 jmp instruction
 ![](pic/intel.png)
 
-**Cannot stub**
+
+# Description of the unit test
+## Cannot stub
 - Can't stub the exit function, the compiler has made special optimizations.
 - Can't stub pure virtual functions, pure virtual functions not have the address.
 - Can't stub lambda functions, lambda functions not get the address.
 - Can't stub static functions, static function address is not visible.(You can try to use addr_any.h api.)
 
-**Test double**
+## Test double
 - Dummy objects are passed around but never actually used. Usually they are just used to fill parameter lists.
 - Fake objects actually have working implementations, but usually take some shortcut which makes them not suitable for production (an InMemoryTestDatabase is a good example).
 - Spy are stubs that also record some information based on how they were called. One form of this might be an email service that records how many messages it was sent.
 - Mock are pre-programmed with expectations which form a specification of the calls they are expected to receive. They can throw an exception if they receive a call they don't expect and are checked during verification to ensure they got all the calls they were expecting.
 - Stub provide canned answers to calls made during the test, usually not responding at all to anything outside what's programmed in for the test.
 
-**Unit test framework**
+## Unit test framework
 - gtest、gmock https://github.com/google/googletest
 - cppunit https://github.com/epronk/cppunit
 - catch2 https://github.com/catchorg/Catch2
@@ -42,7 +45,7 @@
 - kmtest https://github.com/SergiusTheBest/kmtest
 - trompeloeil https://github.com/rollbear/trompeloeil
 
-**Unit test compilation option for linux g++**
+## Unit test compilation option for linux g++
 - -fno-access-control
 - -fno-inline
 - -Wno-pmf-conversions
@@ -51,7 +54,7 @@
 - -fprofile-arcs
 - -ftest-coverage
 
-**Code coverage statistics for linux g++**
+## Code coverage statistics for linux g++
 ```
 lcov -d build/ -z
 lcov -d build/ -b ../../src1 --no-external -rc lcov_branch_coverage=1 -t ut -c -o ut_1.info
@@ -60,7 +63,7 @@ lcov -a ut_1.info -a ut_2.info -o ut.info
 genhtml -o report/ --prefix=`pwd` --branch-coverage --function-coverage ut.info
 ```
 
-**Interface**
+# Interface description
 
 ## stub.h
 ```
@@ -107,7 +110,7 @@ int get_func_addr(std::string func_name, std::map<std::string,void*>& result)
 ```
 not implement
 ```
-**The interface use case**
+# Example of interface usage
 
 ## normal function
 

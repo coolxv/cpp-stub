@@ -1,10 +1,12 @@
 [中文](README_zh.md)|[English](README.md)
 
-**打桩主要涉及两方面问题**
+
+# 原理介绍
+## 两个核心点
 - 如何获取原函数的地址
 - 如何用桩函数替换原函数
 
-**说明**
+## 一些说明
 - stub.h(适合 windows, linux) 基于C++98开发; 使用 inline hook 技术; 主要解决函数替换问题 (相关参考:[x86-api-hooking-demystified](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[stub](https://github.com/3gguan/stub.git)、[Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries))
 - addr_pri.h(适合 windows, linux) 基于C++11开发; 主要解决对象的私有方法地址获取问题 (相关参考:[access_private](https://github.com/martong/access_private))
 - src_linux/addr_any.h(仅适合 linux) 基于C++98开发; 使用 elfio 库查询ELF格式文件的符号表获取函数的地址 (也可以使用 bfd 库); 主要解决静态函数地址获取问题，前提编译时得包含调试信息 (相关参考:[ELFIO](https://github.com/serge1/ELFIO)、[bfd](https://sourceware.org/binutils/docs/bfd/))
@@ -15,24 +17,26 @@
 - 支持的编译器 : msvc,gcc,clang
 - 未来计划支持 macOS 和 ARM
 
-**原理**
+## X86/X64 跳转指令
 ![](pic/intel.png)
 
-**不能打桩**
+
+# 单元测试相关说明
+## 不能打桩
 - 不能对 exit 函数打桩,编译器做优化了
 - 不能对纯虚函数打桩, 纯虚函数没有地址
 - 不能对 lambda 函数打桩, lambda 函数获取不到地址
 - 不能对静态函数打桩, 静态函数地址不可见.(但可以尝试使用 addr_any.h 接口获取地址)
 
 
-**测试替身(来自网络)**
+## 测试替身(来自网络)
 - Dummy objects are passed around but never actually used. Usually they are just used to fill parameter lists.
 - Fake objects actually have working implementations, but usually take some shortcut which makes them not suitable for production (an InMemoryTestDatabase is a good example).
 - Spy are stubs that also record some information based on how they were called. One form of this might be an email service that records how many messages it was sent.
 - Mock are pre-programmed with expectations which form a specification of the calls they are expected to receive. They can throw an exception if they receive a call they don't expect and are checked during verification to ensure they got all the calls they were expecting.
 - Stub provide canned answers to calls made during the test, usually not responding at all to anything outside what's programmed in for the test.
 
-**单元测试框架**
+## 单元测试框架
 - gtest、gmock https://github.com/google/googletest
 - cppunit https://github.com/epronk/cppunit
 - catch2 https://github.com/catchorg/Catch2
@@ -42,7 +46,7 @@
 - kmtest https://github.com/SergiusTheBest/kmtest
 - trompeloeil https://github.com/rollbear/trompeloeil
 
-**单元测试编译选项, linux g++可用的**
+## 单元测试编译选项, linux g++可用的
 - -fno-access-control
 - -fno-inline
 - -Wno-pmf-conversions
@@ -51,7 +55,7 @@
 - -fprofile-arcs
 - -ftest-coverage
 
-**代码覆盖率, linux g++使用方法**
+## 代码覆盖率, linux g++使用方法**
 ```
 lcov -d build/ -z
 lcov -d build/ -b ../../src1 --no-external -rc lcov_branch_coverage=1 -t ut -c -o ut_1.info
@@ -60,7 +64,7 @@ lcov -a ut_1.info -a ut_2.info -o ut.info
 genhtml -o report/ --prefix=`pwd` --branch-coverage --function-coverage ut.info
 ```
 
-**接口**
+# 接口介绍
 
 ## stub.h
 ```
@@ -107,7 +111,8 @@ int get_func_addr(std::string func_name, std::map<std::string,void*>& result)
 ```
 not implement
 ```
-**接口使用示例**
+
+# 接口使用示例
 
 ## 常规函数
 
@@ -535,6 +540,48 @@ int main()
 //for clang, the clang++ 暂时没找到支持获取虚函数地址的扩展语法
 ```
 
+
+## 虚函数并且重载
+
+
+```
+//for linux gcc
+#include<iostream>
+#include "stub.h"
+using namespace std;
+class A{
+    int i;
+public:
+    virtual int foo(int a){
+        cout<<"I am A_foo"<<endl;
+        return 0;
+    }
+    virtual int foo(double a){
+        cout<<"I am A_foo"<<endl;
+        return 0;
+    }
+};
+
+int foo_stub(void* obj, int a)
+{
+    A* o= (A*)obj;
+    cout<<"I am foo_stub"<<endl;
+    return 0;
+}
+
+
+int main()
+{
+    typedef int (*fptr)(A*,int);
+    fptr A_foo = (fptr)((int(A::*)(int))&A::foo);
+    Stub stub;
+    stub.set(A_foo, foo_stub);
+    A a;
+    a.foo(1);
+    return 0;
+}
+```
+
 ## 仿函数
 
 
@@ -888,6 +935,7 @@ int main(int argc, char **argv)
 }
 
 
+
 ```
 ```
 //for windows
@@ -917,11 +965,6 @@ int printf_stub(const char * format, ...)
 }
 
 int main(int argc, char **argv)
-{
-    //Get application static function address
-    {
-        AddrAny any;
-        int main(int argc, char **argv)
 {
 
     //Get application static function address
@@ -964,30 +1007,6 @@ int main(int argc, char **argv)
 
 }
 
-        PVOID addr = any.get_func_addr("foo");
-        
-        foo();
-        Stub stub;
-        stub.set(addr ,foo_stub);
-        foo();
-        //stub.reset(addr);
-        //foo();
-    }
-    //Get dynamic library static function address
-    {
-        AddrAny any;
-        
-        PVOID addr = any.get_func_addr("printf");
-        
-        foo();
-        Stub stub;
-        stub.set(addr ,printf_stub);
-        foo();
-        //stub.reset(addr);
-        //foo();
-    }
 
-    return 0; 
-}
 
 ```
