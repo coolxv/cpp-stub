@@ -2,8 +2,8 @@
 
 # Principle
 ## Two core points
-- How to get the original function address (addr_pri.h, addr_any.h)
-- How to replace the original function with stub function (stub.h)
+- How to get the original function address (**addr_pri.h**, **addr_any.h**)
+- How to replace the original function with stub function (**stub.h**)
 
 ## Some notes
 - stub.h(for windows, linux) related methods based on C++98; use inline hook method; mainly completes the function replacement function (reference:[x86-api-hooking-demystified](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[stub](https://github.com/3gguan/stub.git)、[Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries))
@@ -16,6 +16,8 @@
 - Supported hardware platform  : x86,x86-64
 - Supported compiler           : msvc,gcc,clang
 - Future plans support macOS and ARM
+
+## GOT/PLT Hook vs Trap Hook vs Inline Hook
 
 ## X86/X64 jmp instruction
 ![](pic/intel.png)

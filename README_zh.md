@@ -3,8 +3,8 @@
 
 # 原理介绍
 ## 两个核心点
-- 如何获取原函数的地址
-- 如何用桩函数替换原函数
+- 如何获取原函数的地址(**addr_pri.h**、**addr_any.h**)
+- 如何用桩函数替换原函数(**stub.h**)
 
 ## 一些说明
 - stub.h(适合 windows, linux) 基于C++98开发; 使用 inline hook 技术; 主要解决函数替换问题 (相关参考:[x86-api-hooking-demystified](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[stub](https://github.com/3gguan/stub.git)、[Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries))
@@ -16,6 +16,8 @@
 - 支持的硬件平台 : x86,x86-64
 - 支持的编译器 : msvc,gcc,clang
 - 未来计划支持 macOS 和 ARM
+
+## GOT/PLT Hook 、 Trap Hook 对比 Inline Hook
 
 ## X86/X64 跳转指令
 ![](pic/intel.png)
