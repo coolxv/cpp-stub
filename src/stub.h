@@ -22,7 +22,7 @@
 /**********************************************************
                   replace function
 **********************************************************/
-
+#define __arm__
 
 #define CODESIZE 13U
 #define CODESIZE_MIN 5U
@@ -33,20 +33,30 @@
     // ldr x9, +8 
     // br x9 
     // addr 
-    #define REPLACE_FAR(fn, fn_stub)\
+    #define REPLACE_FAR(t, fn, fn_stub)\
         ((uint32_t*)fn)[0] = 0x58000040 | 9;\
         ((uint32_t*)fn)[1] = 0xd61f0120 | (9 << 5);\
         *(long long *)(fn + 8) = (long long )fn_stub;
-    #define REPLACE_NEAR(fn, fn_stub) REPLACE_FAR(fn, fn_stub)
+    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__arm__) || defined(_M_ARM)
-    #error "ARM32 is not supported"
+    #define ROUND_DOWN(num, unit) ((num) & ~((unit) - 1))
+    // adrp x9, fn
+    // br x9
+    #define REPLACE_FAR(t, fn, fn_stub)\
+        intptr_t imm = ROUND_DOWN((size_t)fn, this->m_pagesize) - ROUND_DOWN((size_t)fn_stub, this->m_pagesize);\
+        size_t immlo = (imm >> 12) & 0x03;\
+        size_t immhi = (imm >> 14) & 0x7FFFFul;\
+        ((uint32_t*)fn)[0] = 0x90000009 | (immlo << 29) | (immhi << 5);\
+        ((uint32_t*)fn)[1] = 0xd61f0120;
+    
+    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__thumb__) || defined(_M_THUMB)
     #error "Thumb is not supported"
 #else //__i386__ _x86_64__
     //13 byte(jmp m16:64)
     //movabs $0x102030405060708,%r11
     //jmpq   *%r11
-    #define REPLACE_FAR(fn, fn_stub)\
+    #define REPLACE_FAR(t, fn, fn_stub)\
         *fn = 0x49;\
         *(fn + 1) = 0xbb;\
         *(long long *)(fn + 2) = (long long)fn_stub;\
@@ -55,7 +65,7 @@
         *(fn + 12) = 0xe3;
 
     //5 byte(jmp rel32)
-    #define REPLACE_NEAR(fn, fn_stub)\
+    #define REPLACE_NEAR(t, fn, fn_stub)\
         *fn = 0xE9;\
         *(int *)(fn + 1) = (int)(fn_stub - fn - CODESIZE_MIN);
 #endif
@@ -157,11 +167,11 @@ public:
 
         if(pstub->far_jmp)
         {
-            REPLACE_FAR(fn, fn_stub);
+            REPLACE_FAR(this, fn, fn_stub);
         }
         else
         {
-            REPLACE_NEAR(fn, fn_stub);
+            REPLACE_NEAR(this, fn, fn_stub);
         }
 
 

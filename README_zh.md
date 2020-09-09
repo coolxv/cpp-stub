@@ -15,7 +15,7 @@
 - 支持的操作系统 : windows,linux
 - 支持的硬件平台 : x86,x86-64,arm64
 - 支持的编译器 : msvc,gcc,clang
-- 未来计划支持 macOS 和 ARM
+- 未来计划支持 macOS
 
 ## GOT/PLT Hook 、 Trap Hook 对比 Inline Hook
 

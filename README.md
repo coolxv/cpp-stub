@@ -15,7 +15,7 @@
 - Supported operating systems  : windows,linux
 - Supported hardware platform  : x86,x86-64,arm64
 - Supported compiler           : msvc,gcc,clang
-- Future plans support macOS and ARM
+- Future plans support macOS
 
 ## GOT/PLT Hook vs Trap Hook vs Inline Hook
 
