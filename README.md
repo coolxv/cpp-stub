@@ -13,7 +13,7 @@
 - The usage of windows and linux will be slightly different, because the methods for getting different types of function addresses are different, and the calling conventions are sometimes different.
 - Getting virtual function addresses is complicated.Different compilers have different methods of obtaining(reference: [cxx-abi](https://itanium-cxx-abi.github.io/cxx-abi/abi.html#vtable))
 - Supported operating systems  : windows,linux
-- Supported hardware platform  : x86,x86-64
+- Supported hardware platform  : x86,x86-64,arm64
 - Supported compiler           : msvc,gcc,clang
 - Future plans support macOS and ARM
 

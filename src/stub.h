@@ -29,22 +29,36 @@
 #define CODESIZE_MAX CODESIZE
 
 
-//13 byte(jmp m16:64)
-//movabs $0x102030405060708,%r11
-//jmpq   *%r11
-#define REPLACE_FAR(fn, fn_stub)\
-    *fn = 0x49;\
-    *(fn + 1) = 0xbb;\
-    *(long long *)(fn + 2) = (long long)fn_stub;\
-    *(fn + 10) = 0x41;\
-    *(fn + 11) = 0xff;\
-    *(fn + 12) = 0xe3;
+#if defined(__aarch64__) || defined(_M_ARM64)
+    // ldr x9, +8 
+    // br x9 
+    // addr 
+    #define REPLACE_FAR(fn, fn_stub)\
+        ((uint32_t*)fn)[0] = 0x58000040 | 9;\
+        ((uint32_t*)fn)[1] = 0xd61f0120 | (9 << 5);\
+        *(long long *)(fn + 8) = (long long )fn_stub;
+    #define REPLACE_NEAR(fn, fn_stub) REPLACE_FAR(fn, fn_stub)
+#elif defined(__arm__) || defined(_M_ARM)
+    #error "ARM32 is not supported"
+#elif defined(__thumb__) || defined(_M_THUMB)
+    #error "Thumb is not supported"
+#else //__i386__ _x86_64__
+    //13 byte(jmp m16:64)
+    //movabs $0x102030405060708,%r11
+    //jmpq   *%r11
+    #define REPLACE_FAR(fn, fn_stub)\
+        *fn = 0x49;\
+        *(fn + 1) = 0xbb;\
+        *(long long *)(fn + 2) = (long long)fn_stub;\
+        *(fn + 10) = 0x41;\
+        *(fn + 11) = 0xff;\
+        *(fn + 12) = 0xe3;
 
-//5 byte(jmp rel32)
-#define REPLACE_NEAR(fn, fn_stub)\
-    *fn = 0xE9;\
-    *(int *)(fn + 1) = (int)(fn_stub - fn - CODESIZE_MIN);
-
+    //5 byte(jmp rel32)
+    #define REPLACE_NEAR(fn, fn_stub)\
+        *fn = 0xE9;\
+        *(int *)(fn + 1) = (int)(fn_stub - fn - CODESIZE_MIN);
+#endif
 
 struct func_stub
 {
