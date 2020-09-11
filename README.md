@@ -534,6 +534,7 @@ int main()
 
 ```
 //for windows x64, the visual studio compiler does not support inline assembly. There are solutions to search for yourself.
+https://docs.microsoft.com/en-us/cpp/assembler/inline/inline-assembler?view=vs-2019
 ```
 
 ```

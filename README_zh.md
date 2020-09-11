@@ -536,6 +536,7 @@ int main()
 
 ```
 //for windows x64, msvc x64位不支持内联汇编语法, 可以试下单独汇编文件获取
+https://docs.microsoft.com/en-us/cpp/assembler/inline/inline-assembler?view=vs-2019
 ```
 
 ```
