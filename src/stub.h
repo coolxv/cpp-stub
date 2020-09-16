@@ -38,16 +38,10 @@
         *(long long *)(fn + 8) = (long long )fn_stub;
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__arm__) || defined(_M_ARM)
-    #define ROUND_DOWN(num, unit) ((num) & ~((unit) - 1))
-    // adrp x9, fn
-    // br x9
+    // ldr pc, [pc, #-4]
     #define REPLACE_FAR(t, fn, fn_stub)\
-        intptr_t imm = ROUND_DOWN((size_t)fn, this->m_pagesize) - ROUND_DOWN((size_t)fn_stub, this->m_pagesize);\
-        size_t immlo = (imm >> 12) & 0x03;\
-        size_t immhi = (imm >> 14) & 0x7FFFFul;\
-        ((uint32_t*)fn)[0] = 0x90000009 | (immlo << 29) | (immhi << 5);\
-        ((uint32_t*)fn)[1] = 0xd61f0120;
-    
+        ((uint32_t*)fn)[0] = 0xe51ff004;\
+        ((uint32_t*)fn)[1] = (uint32_t)fn_stub;
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__thumb__) || defined(_M_THUMB)
     #error "Thumb is not supported"

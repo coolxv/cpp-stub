@@ -4,7 +4,8 @@ TARGETS = $(patsubst %.cpp, %, $(SOURCE))
 INC=-I../src -I../src_linux
 LIB=-lm
 CC = g++
-CFLAGS =-std=c++11 -m32 -g -no-pie -fno-stack-protector -Wall -Wno-unused-function  -Wno-unused-variable -Wno-pmf-conversions
+#CFLAGS =-std=c++11 -m32 -g -no-pie -fno-stack-protector -Wall -Wno-unused-function  -Wno-unused-variable -Wno-pmf-conversions
+CFLAGS =-std=c++11 -g -no-pie -fno-stack-protector -Wall -Wno-unused-function  -Wno-unused-variable -Wno-pmf-conversions
 
 all:clean $(TARGETS)
  
