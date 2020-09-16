@@ -23,12 +23,11 @@
                   replace function
 **********************************************************/
 
-#define CODESIZE 13U
-#define CODESIZE_MIN 5U
-#define CODESIZE_MAX CODESIZE
-
 
 #if defined(__aarch64__) || defined(_M_ARM64)
+    #define CODESIZE 16U
+    #define CODESIZE_MIN 16U
+    #define CODESIZE_MAX CODESIZE
     // ldr x9, +8 
     // br x9 
     // addr 
@@ -38,6 +37,9 @@
         *(long long *)(fn + 8) = (long long )fn_stub;
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__arm__) || defined(_M_ARM)
+    #define CODESIZE 8U
+    #define CODESIZE_MIN 8U
+    #define CODESIZE_MAX CODESIZE
     // ldr pc, [pc, #-4]
     #define REPLACE_FAR(t, fn, fn_stub)\
         ((uint32_t*)fn)[0] = 0xe51ff004;\
@@ -46,6 +48,9 @@
 #elif defined(__thumb__) || defined(_M_THUMB)
     #error "Thumb is not supported"
 #else //__i386__ _x86_64__
+    #define CODESIZE 13U
+    #define CODESIZE_MIN 5U
+    #define CODESIZE_MAX CODESIZE
     //13 byte(jmp m16:64)
     //movabs $0x102030405060708,%r11
     //jmpq   *%r11
