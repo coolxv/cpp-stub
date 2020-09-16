@@ -22,6 +22,10 @@
 ## X86/X64 跳转指令
 ![](pic/intel.png)
 
+## aarch32/aarch64 跳转指令
+![](pic/arm32.png)
+
+![](pic/arm64.png)
 
 # 单元测试相关说明
 ## 不能打桩

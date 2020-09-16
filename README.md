@@ -22,6 +22,10 @@
 ## X86/X64 jmp instruction
 ![](pic/intel.png)
 
+## aarch32/aarch64 jmp instruction
+![](pic/arm32.png)
+
+![](pic/arm64.png)
 
 # Description of the unit test
 ## Cannot stub
