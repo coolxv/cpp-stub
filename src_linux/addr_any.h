@@ -14,7 +14,7 @@
 #include <string>
 #include <map>
 //project
-#include "elfio/elfio/elfio.hpp"
+#include "elfio.hpp"
 
 
 

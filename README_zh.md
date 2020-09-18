@@ -7,7 +7,7 @@
 - 如何用桩函数替换原函数(**stub.h**)
 
 ## 一些说明
-- stub.h(适合 windows, linux) 基于C++98开发; 使用 inline hook 技术; 主要解决函数替换问题 (相关参考:[x86-api-hooking-demystified](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[stub](https://github.com/3gguan/stub.git)、[Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries))
+- stub.h(适合 windows, linux) 基于C++98开发; 使用 inline hook 技术; 主要解决函数替换问题 (相关参考:[stub](https://github.com/3gguan/stub.git))
 - addr_pri.h(适合 windows, linux) 基于C++11开发; 主要解决对象的私有方法地址获取问题 (相关参考:[access_private](https://github.com/martong/access_private))
 - src_linux/addr_any.h(仅适合 linux) 基于C++98开发; 使用 elfio 库查询ELF格式文件的符号表获取函数的地址 (也可以使用 bfd 库); 主要解决静态函数地址获取问题，前提编译时得包含调试信息 (相关参考:[ELFIO](https://github.com/serge1/ELFIO)、[bfd](https://sourceware.org/binutils/docs/bfd/))
 - src_win/addr_any.h(仅适合 windows) 基于C++98开发; 使用 dbghelp 库查询PDB文件的符号表获取函数的地址; 主要解决静态函数地址获取问题，前提编译时得包含调试信息 (相关参考:[symbol-files](https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files)、[dbghelpexamples](http://www.debuginfo.com/examples/dbghelpexamples.html)、[pelib](http://www.pelib.com/index.php))
@@ -18,6 +18,22 @@
 - 未来计划支持 macOS
 
 ## GOT/PLT Hook 、 Trap Hook 对比 Inline Hook
+
+| | GOT/PLT Hook | Trap Hook | Inline Hook |
+| --- | --- | --- | --- |
+| The implementation principle | Modify Delay Binding Table | SIGTRAP Breakpoint Signal | Runtime Instruction Replacement |
+| granularity | method level | instruction level | instruction level |
+| Scopes | Narrow | Wide | Wide |
+| Performance | High | Low | High |
+| Difficulty | Medium | Medium |  High|
+
+- Inline hook
+![](pic/inline.png)
+
+
+- GOT/PLT hook
+![](pic/pltgot.png)
+
 
 ## X86/X64 跳转指令
 ![](pic/intel.png)

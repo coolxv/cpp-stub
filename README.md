@@ -6,7 +6,7 @@
 - How to replace the original function with stub function (**stub.h**)
 
 ## Some notes
-- stub.h(for windows, linux) related methods based on C++98; use inline hook method; mainly completes the function replacement function (reference:[x86-api-hooking-demystified](http://jbremer.org/x86-api-hooking-demystified/#ah-other-2)、[stub](https://github.com/3gguan/stub.git)、[Redirecting-functions-in-shared-ELF-libraries](https://www.codeproject.com/Articles/70302/Redirecting-functions-in-shared-ELF-libraries))
+- stub.h(for windows, linux) related methods based on C++98; use inline hook method; mainly completes the function replacement function (reference:[stub](https://github.com/3gguan/stub.git))
 - addr_pri.h(for windows, linux) related methods based on C++11; mainly completes the class's private function address acquisition (reference:[access_private](https://github.com/martong/access_private))
 - src_linux/addr_any.h(only for linux) related methods based on C++98, use the elfio library to query the symbol table (also use bfd parsing, centos:binutils-devel); mainly complete the arbitrary form function address acquisition (reference:[ELFIO](https://github.com/serge1/ELFIO)、[bfd](https://sourceware.org/binutils/docs/bfd/))
 - src_win/addr_any.h(only for windows) related methods based on C++98, use the dbghelp library to query the symbol table of the pdb file (you can also use the pe library to parse the exported symbols); mainly complete the arbitrary form function address acquisition (reference:[symbol-files](https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files)、[dbghelpexamples](http://www.debuginfo.com/examples/dbghelpexamples.html)、[pelib](http://www.pelib.com/index.php))
@@ -18,6 +18,21 @@
 - Future plans support macOS
 
 ## GOT/PLT Hook vs Trap Hook vs Inline Hook
+
+| | GOT/PLT Hook | Trap Hook | Inline Hook |
+| --- | --- | --- | --- |
+| 实现原理 | 修改延时绑定表 | SIGTRAP断点信号 | 运行时指令替换 |
+| 粒度 | 方法级 | 指令级 | 指令级 |
+| 作用域 | 窄 | 广 | 广 |
+| 性能 | 高 | 低 | 高 |
+| 难度 | 中 | 中 | 极高 |
+
+- Inline hook
+![](pic/inline.png)
+
+
+- GOT/PLT hook
+![](pic/pltgot.png)
 
 ## X86/X64 jmp instruction
 ![](pic/intel.png)
