@@ -34,6 +34,7 @@
 ![](pic/pltgot.png)
 
 - Trap hook
+
 [ptrace](https://man7.org/linux/man-pages/man2/ptrace.2.html)
 
 [signal](https://www.gnu.org/software/libc/manual/html_node/Signal-Handling.html)
