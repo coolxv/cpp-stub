@@ -37,10 +37,15 @@
 ## X86/X64 jmp instruction
 ![](pic/intel.png)
 
-## aarch32/aarch64 jmp instruction
+## Aarch32/Aarch64 jmp instruction
 ![](pic/arm32.png)
 
 ![](pic/arm64.png)
+
+## Trap hook
+- [ptrace](https://man7.org/linux/man-pages/man2/ptrace.2.html)
+- [signal](https://www.gnu.org/software/libc/manual/html_node/Signal-Handling.html)
+- A trap is an exception in a user process. It's caused by division by zero or invalid memory access. It's also the usual way to invoke a kernel routine (a system call) because of those run with a higher priority than user code.
 
 # Description of the unit test
 ## Cannot stub
@@ -65,6 +70,14 @@
 - doctest https://github.com/onqtam/doctest
 - kmtest https://github.com/SergiusTheBest/kmtest
 - trompeloeil https://github.com/rollbear/trompeloeil
+
+## Use Case Auto-generation tool
+- [RamFuzz](https://github.com/dekimir/RamFuzz)
+- [api-sanity-checker](https://github.com/lvc/api-sanity-checker)
+- [deepstate](https://github.com/trailofbits/deepstate)
+- [Wings](http://www.codewings.net/)
+- [C++test](https://www.parasoft.com/products/ctest/)
+
 
 ## Unit test compilation option for linux g++
 - -fno-access-control

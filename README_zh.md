@@ -39,10 +39,17 @@
 ## X86/X64 跳转指令
 ![](pic/intel.png)
 
-## aarch32/aarch64 跳转指令
+## Aarch32/Aarch64 跳转指令
+
 ![](pic/arm32.png)
 
 ![](pic/arm64.png)
+
+## Trap hook
+- [ptrace](https://man7.org/linux/man-pages/man2/ptrace.2.html)
+- [signal](https://www.gnu.org/software/libc/manual/html_node/Signal-Handling.html)
+- 陷阱就是用户态的异常，比如除灵零操作和访问无效内存等，还有系统调用也是。
+
 
 # 单元测试相关说明
 ## 不能打桩
@@ -69,6 +76,14 @@
 - kmtest https://github.com/SergiusTheBest/kmtest
 - trompeloeil https://github.com/rollbear/trompeloeil
 
+## 用例自动生成工具
+- [RamFuzz](https://github.com/dekimir/RamFuzz)
+- [api-sanity-checker](https://github.com/lvc/api-sanity-checker)
+- [deepstate](https://github.com/trailofbits/deepstate)
+- [Wings](http://www.codewings.net/)
+- [C++test](https://www.parasoft.com/products/ctest/)
+
+
 ## 单元测试编译选项, linux g++可用的
 - -fno-access-control
 - -fno-inline
@@ -78,7 +93,7 @@
 - -fprofile-arcs
 - -ftest-coverage
 
-## 代码覆盖率, linux g++使用方法**
+## 代码覆盖率, linux g++使用方法
 ```
 lcov -d build/ -z
 lcov -d build/ -b ../../src1 --no-external -rc lcov_branch_coverage=1 -t ut -c -o ut_1.info
