@@ -36,6 +36,13 @@
 ![](pic/pltgot.png)
 
 
+- Trap hook
+[ptrace](https://man7.org/linux/man-pages/man2/ptrace.2.html)
+
+[signal](https://www.gnu.org/software/libc/manual/html_node/Signal-Handling.html)
+
+陷阱就是用户态的异常，比如除灵零操作和访问无效内存等，还有系统调用也是。
+
 ## X86/X64 跳转指令
 ![](pic/intel.png)
 
@@ -44,11 +51,6 @@
 ![](pic/arm32.png)
 
 ![](pic/arm64.png)
-
-## Trap hook
-- [ptrace](https://man7.org/linux/man-pages/man2/ptrace.2.html)
-- [signal](https://www.gnu.org/software/libc/manual/html_node/Signal-Handling.html)
-- 陷阱就是用户态的异常，比如除灵零操作和访问无效内存等，还有系统调用也是。
 
 
 # 单元测试相关说明

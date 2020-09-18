@@ -30,9 +30,16 @@
 - Inline hook
 ![](pic/inline.png)
 
-
 - GOT/PLT hook
 ![](pic/pltgot.png)
+
+- Trap hook
+[ptrace](https://man7.org/linux/man-pages/man2/ptrace.2.html)
+
+[signal](https://www.gnu.org/software/libc/manual/html_node/Signal-Handling.html)
+
+A trap is an exception in a user process. It's caused by division by zero or invalid memory access. It's also the usual way to invoke a kernel routine (a system call) because of those run with a higher priority than user code.
+
 
 ## X86/X64 jmp instruction
 ![](pic/intel.png)
@@ -41,11 +48,6 @@
 ![](pic/arm32.png)
 
 ![](pic/arm64.png)
-
-## Trap hook
-- [ptrace](https://man7.org/linux/man-pages/man2/ptrace.2.html)
-- [signal](https://www.gnu.org/software/libc/manual/html_node/Signal-Handling.html)
-- A trap is an exception in a user process. It's caused by division by zero or invalid memory access. It's also the usual way to invoke a kernel routine (a system call) because of those run with a higher priority than user code.
 
 # Description of the unit test
 ## Cannot stub
