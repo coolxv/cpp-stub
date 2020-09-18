@@ -21,11 +21,12 @@
 
 | | GOT/PLT Hook | Trap Hook | Inline Hook |
 | --- | --- | --- | --- |
-| The implementation principle | Modify Delay Binding Table | SIGTRAP Breakpoint Signal | Runtime Instruction Replacement |
-| granularity | method level | instruction level | instruction level |
-| Scopes | Narrow | Wide | Wide |
-| Performance | High | Low | High |
-| Difficulty | Medium | Medium |  High|
+| 实现原理 | 修改延时绑定表 | SIGTRAP断点信号 | 运行时指令替换 |
+| 粒度 | 方法级 | 指令级 | 指令级 |
+| 作用域 | 窄 | 广 | 广 |
+| 性能 | 高 | 低 | 高 |
+| 难度 | 中 | 中 | 极高 |
+
 
 - Inline hook
 ![](pic/inline.png)
