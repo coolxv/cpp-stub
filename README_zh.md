@@ -37,12 +37,23 @@
 
 
 - Trap hook
+陷阱就是用户态的异常，比如除灵零操作和访问无效内存等，还有系统调用也是。
 
 [ptrace](https://man7.org/linux/man-pages/man2/ptrace.2.html)
 
 [signal](https://www.gnu.org/software/libc/manual/html_node/Signal-Handling.html)
 
-陷阱就是用户态的异常，比如除灵零操作和访问无效内存等，还有系统调用也是。
+[windows SEH](https://docs.microsoft.com/en-us/cpp/cpp/structured-exception-handling-c-cpp?view=vs-2019)
+
+[linux EH](http://wiki.dwarfstd.org/index.php?title=Exception_Handling)
+
+[linux SEH](https://gcc.gnu.org/wiki/WindowsGCCImprovements)
+
+[VEH and INT3 for windows](https://gist.github.com/coolxv/713f3cc6d013ad49c1a01804f24036d2)
+
+[Sig and INT3 for linux](https://gist.github.com/coolxv/22e92aa307cd9346fb6172385fb23fa8)
+
+
 
 ## X86/X64 跳转指令
 ![](pic/intel.png)
