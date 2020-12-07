@@ -6,7 +6,7 @@ LINK = link.exe
 RM = del 
 #
 CPPFLAGS = /nologo /D  "WIN32" /Od /c /EHsc /Z7 /I..\src /I..\src_win 
-LDFLAGS = /nologo /DEBUG:FULL /MAP
+LDFLAGS = /nologo /DEBUG:FULL /MAP /INCREMENTAL:NO
 INC = /I..\src /I..\src_win 
 #
 SRCS_CXX = test_private_member_function_win.cpp\
@@ -19,7 +19,8 @@ SRCS_CXX = test_private_member_function_win.cpp\
 			test_functor_win.cpp\
 			test_dynamic_library_win.cpp\
 			test_variadic_function.cpp\
-			test_class_member_function.cpp
+			test_class_member_function.cpp\
+			test_constructor_function_x86_win.cpp
 OBJS_CXX = $(SRCS_CXX:.cpp=.obj) 
 TARGET = $(SRCS_CXX:.cpp=)
 TARGETEXE = $(SRCS_CXX:.cpp=.exe) 

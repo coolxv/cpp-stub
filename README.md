@@ -161,6 +161,155 @@ not implement
 ```
 # Example of interface usage
 
+## constructor
+You can also use the addr_any.h interface to get the address of the constructor.
+```
+//for linux
+#include<iostream>
+#include "stub.h"
+using namespace std;
+
+
+template<class T>
+void * get_ctor_addr(bool start = true)
+{
+	//the start vairable must be true, or the compiler will optimize out.
+    if(start) goto Start;
+Call_Constructor:
+    //This line of code will not be executed.
+	//The purpose of the code is to allow the compiler to generate the assembly code that calls the constructor.
+    T();
+Start:
+    //The address of the line of code T() obtained by assembly
+    char * p = (char*)&&Call_Constructor;//https://gcc.gnu.org/onlinedocs/gcc/Labels-as-Values.html
+    int offset = *(int *)(p + 8);
+    void * ret = p + 12 + offset;
+    
+    return ret;
+}
+
+
+class A {
+public:
+    A(){cout << "I am A_constructor" << endl;}
+};
+
+class B {
+public:
+    B(){cout << "I am B_constructor" << endl;}
+};
+
+
+int main()
+{
+    Stub stub;
+    auto xa = get_ctor_addr<A>();
+    auto xb = get_ctor_addr<B>();
+    stub.set(xa, xb);
+    A aa;
+    return 0;
+}
+
+////////////////////
+//  principle
+////////////////////
+00000000004013e3 <void* get_ctor_addr<A>(bool)>:
+  4013e3:       55                      push   %rbp
+  4013e4:       48 89 e5                mov    %rsp,%rbp
+  4013e7:       48 83 ec 30             sub    $0x30,%rsp
+  4013eb:       89 f8                   mov    %edi,%eax
+  4013ed:       88 45 dc                mov    %al,-0x24(%rbp)
+  4013f0:       80 7d dc 00             cmpb   $0x0,-0x24(%rbp)
+  4013f4:       75 0e                   jne    401404 <void* get_ctor_addr<A>(bool)+0x21>
+  4013f6:       48 8d 45 e7             lea    -0x19(%rbp),%rax
+  4013fa:       48 89 c7                mov    %rax,%rdi
+  4013fd:       e8 38 fe ff ff          callq  40123a <A::A()>
+  401402:       eb 01                   jmp    401405 <void* get_ctor_addr<A>(bool)+0x22>
+  401404:       90                      nop
+  401405:       48 c7 45 f8 f6 13 40    movq   $0x4013f6,-0x8(%rbp)
+......
+
+
+```
+
+```
+//for windows x86
+// /INCREMENTAL:NO
+#include<iostream>
+#include "stub.h"
+using namespace std;
+
+
+template<class T>
+void * get_ctor_addr()
+{
+    goto Start;
+Call_Constructor:
+    //This line of code will not be executed.
+	//The purpose of the code is to allow the compiler to generate the assembly code that calls the constructor.
+    T();
+Start:
+    //The address of the line of code T() obtained by assembly
+    char * p = nullptr;
+    __asm { mov[p], offset Call_Constructor }
+    /*
+    __asm
+    {
+        MOV EAX, OFFSET Call_Constructor
+        MOV DWORD PTR[p], EAX
+    }
+    */
+    int offset = *(int *)(p + 4);
+    void * ret = p + 8 + offset;
+    
+    return ret;
+}
+
+
+class A {
+public:
+    A(){cout << "I am A_constructor" << endl;}
+};
+
+class B {
+public:
+    B(){cout << "I am B_constructor" << endl;}
+};
+
+
+int main()
+{
+    Stub stub;
+    auto xa = get_ctor_addr<A>();
+    auto xb = get_ctor_addr<B>();
+    stub.set(xa, xb);
+    A aa;
+    return 0;
+}
+////////////////////
+//  principle
+////////////////////
+Call_Constructor:
+    //This line of code will not be executed.
+	//The purpose of the code is to allow the compiler to generate the assembly code that calls the constructor.
+	T();
+00C4289A 8D 4D F0             lea         ecx,[ebp-10h]  
+00C4289D E8 DE 0C 00 00       call        A::A (0C43580h)  
+Start:
+	//The address of the line of code T() obtained by assembly
+	char * p = nullptr;
+00C428A2 C7 45 FC 00 00 00 00 mov         dword ptr [p],0  
+	__asm { mov[p], offset Call_Constructor }
+00C428A9 C7 45 FC 9A 28 C4 00 mov         dword ptr [p],offset Call_Constructor (0C4289Ah)  
+......
+
+//for windows x64, the visual studio compiler does not support inline assembly. There are solutions to search for yourself.
+//https://social.msdn.microsoft.com/Forums/vstudio/en-US/e8b13ec0-32f0-4dcd-a5a2-59fc29e824e5/true-address-of-virtual-member-function-not-thunk?forum=vclanguage
+
+
+```
+
+
 ## normal function
 
 ```
