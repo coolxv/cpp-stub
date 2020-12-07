@@ -173,11 +173,11 @@ using namespace std;
 template<class T>
 void * get_ctor_addr(bool start = true)
 {
-	//the start vairable must be true, or the compiler will optimize out.
+    //the start vairable must be true, or the compiler will optimize out.
     if(start) goto Start;
 Call_Constructor:
     //This line of code will not be executed.
-	//The purpose of the code is to allow the compiler to generate the assembly code that calls the constructor.
+    //The purpose of the code is to allow the compiler to generate the assembly code that calls the constructor.
     T();
 Start:
     //The address of the line of code T() obtained by assembly
@@ -246,7 +246,7 @@ void * get_ctor_addr()
     goto Start;
 Call_Constructor:
     //This line of code will not be executed.
-	//The purpose of the code is to allow the compiler to generate the assembly code that calls the constructor.
+    //The purpose of the code is to allow the compiler to generate the assembly code that calls the constructor.
     T();
 Start:
     //The address of the line of code T() obtained by assembly
@@ -291,15 +291,15 @@ int main()
 ////////////////////
 Call_Constructor:
     //This line of code will not be executed.
-	//The purpose of the code is to allow the compiler to generate the assembly code that calls the constructor.
-	T();
+    //The purpose of the code is to allow the compiler to generate the assembly code that calls the constructor.
+    T();
 00C4289A 8D 4D F0             lea         ecx,[ebp-10h]  
 00C4289D E8 DE 0C 00 00       call        A::A (0C43580h)  
 Start:
-	//The address of the line of code T() obtained by assembly
-	char * p = nullptr;
+    //The address of the line of code T() obtained by assembly
+    char * p = nullptr;
 00C428A2 C7 45 FC 00 00 00 00 mov         dword ptr [p],0  
-	__asm { mov[p], offset Call_Constructor }
+    __asm { mov[p], offset Call_Constructor }
 00C428A9 C7 45 FC 9A 28 C4 00 mov         dword ptr [p],offset Call_Constructor (0C4289Ah)  
 ......
 
@@ -853,6 +853,54 @@ int main()
 ## lambda
 
 ```
+//for linux gcc
+#include<iostream>
+#include<cstdio>
+#include "stub.h"
+#include "addr_any.h"
+
+//This lambda function can be in another file or in another dynamic library, needed -g -O0 compile
+static int foo()
+{
+    int temp = 2;
+    auto a =  [temp](int a){std::cout << "foo lambda:" << a + temp << std::endl;};
+    a(1);
+    std::cout << "I am foo" << std::endl;
+    return 0;
+}
+
+
+void foo_lambda_stub(void *obj, int a)
+{
+    //__closure={__temp = 2}
+    std::cout << "I am foo_lambda_stub:" << *(int*)obj + a << std::endl;
+    return;
+}
+
+
+int main(int argc, char **argv)
+{
+    //Get application static function address
+    {
+        AddrAny any;
+        
+        std::map<std::string,void*> result;
+        any.get_local_func_addr_symtab("^foo()::{lambda.*", result);
+        
+        foo();
+        Stub stub;
+        std::map<std::string,void*>::iterator it;
+        for (it=result.begin(); it!=result.end(); ++it)
+        {
+            stub.set(it->second ,foo_lambda_stub);
+            std::cout << it->first << " => " << it->second << std::endl;
+        }
+        foo();  
+    
+    }
+
+    return 0;
+}
 
 
 ```
