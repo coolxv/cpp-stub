@@ -909,6 +909,56 @@ int main(int argc, char **argv)
 
 ```
 
+```
+//for windows
+#include<iostream>
+#include<cstdio>
+#include "stub.h"
+#include "addr_any.h"
+
+static int foo()
+{
+    int love = 3;
+    auto a =  [love](int a){std::cout << "foo lambda:" << a + love << std::endl;};
+    a(4);
+    std::cout << "I am foo" << std::endl;
+    return 0;
+}
+
+
+void foo_lambda_stub(int a, int love)
+{
+    //void <lambda>(int a){love=0x00000003 }
+    std::cout << "I am foo_lambda_stub:" << love + a << std::endl;
+    return;
+}
+
+
+int main(int argc, char **argv)
+{
+
+    //Get application static function address
+    {
+        AddrAny any;
+        
+        std::map<std::string,void*> result;
+        any.get_func_addr("<lambda_7a2556dcb8fa4823d2787bd5788e0b01>::operator()", result);
+        
+        foo();
+        Stub stub;
+        std::map<std::string,void*>::iterator it;
+        for (it=result.begin(); it!=result.end(); ++it)
+        {
+            stub.set(it->second ,foo_lambda_stub);
+            std::cout << it->first << " => " << it->second << std::endl;
+        }
+        foo();  
+    
+    }
+    return 0;
+}
+```
+
 ## 内联函数
 
 ```
