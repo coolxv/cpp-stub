@@ -97,6 +97,8 @@
 - [klee](https://github.com/klee/klee)
 - [s2e](https://github.com/S2E/s2e)
 - [symCC](https://github.com/eurecom-s3/symcc)
+- [SVF](https://github.com/SVF-tools/SVF)
+- [Triton](https://github.com/JonathanSalwan/Triton/)
 - [AFL](https://github.com/google/AFL)
 - [QSYM](https://github.com/sslab-gatech/qsym)
 - [angr](https://github.com/angr/angr)
