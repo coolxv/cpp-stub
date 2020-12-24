@@ -2958,7 +2958,6 @@ template <class S> class symbol_section_accessor_template
 		std::function<void( Elf_Xword first, Elf_Xword second )> func )
 	{
 		const endianess_convertor& convertor = elf_file.get_convertor();
-		const Elf_Xword            size      = symbol_section->get_entry_size();
 
 		Elf_Xword first_not_local =
 			1; // Skip the first entry. It is always NOTYPE
