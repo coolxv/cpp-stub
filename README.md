@@ -87,6 +87,7 @@ A trap is an exception in a user process. It's caused by division by zero or inv
 - trompeloeil https://github.com/rollbear/trompeloeil
 
 ## Use Case Auto-test tool
+### Open source software
 - [klee](https://github.com/klee/klee)
 - [s2e](https://github.com/S2E/s2e)
 - [symCC](https://github.com/eurecom-s3/symcc)
@@ -98,9 +99,15 @@ A trap is an exception in a user process. It's caused by division by zero or inv
 - [RamFuzz](https://github.com/dekimir/RamFuzz)
 - [api-sanity-checker](https://github.com/lvc/api-sanity-checker)
 - [deepstate](https://github.com/trailofbits/deepstate)
+### Commercial software
 - [Wings](http://www.codewings.net/)
 - [C++test](https://www.parasoft.com/products/ctest/)
+- [VectorCAST/C++](https://www.vector.com/int/en/products/products-a-z/software/vectorcast/vectorcast-c/)
+- [Visual Unit](http://www.kailesoft.com/download/download_detail/23.html)
 
+### Symbolic Execution
+https://github.com/enzet/symbolic-execution
+![](pic/se.png)
 
 ## Unit test compilation option for linux g++
 - -fno-access-control

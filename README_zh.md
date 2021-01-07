@@ -94,6 +94,7 @@
 - trompeloeil https://github.com/rollbear/trompeloeil
 
 ## 用例自动测试工具
+### 开源软件
 - [klee](https://github.com/klee/klee)
 - [s2e](https://github.com/S2E/s2e)
 - [symCC](https://github.com/eurecom-s3/symcc)
@@ -105,9 +106,15 @@
 - [RamFuzz](https://github.com/dekimir/RamFuzz)
 - [api-sanity-checker](https://github.com/lvc/api-sanity-checker)
 - [deepstate](https://github.com/trailofbits/deepstate)
+### 商业软件
 - [Wings](http://www.codewings.net/)
 - [C++test](https://www.parasoft.com/products/ctest/)
+- [VectorCAST/C++](https://www.vector.com/int/en/products/products-a-z/software/vectorcast/vectorcast-c/)
+- [Visual Unit](http://www.kailesoft.com/download/download_detail/23.html)
 
+### 符号执行
+https://github.com/enzet/symbolic-execution
+![](pic/se.png)
 
 ## 单元测试编译选项, linux g++可用的
 - -fno-access-control
