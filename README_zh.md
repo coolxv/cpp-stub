@@ -95,26 +95,28 @@
 
 ## 用例自动测试工具
 ### 开源软件
-- [klee](https://github.com/klee/klee)
-- [s2e](https://github.com/S2E/s2e)
-- [symCC](https://github.com/eurecom-s3/symcc)
-- [SVF](https://github.com/SVF-tools/SVF)
-- [Triton](https://github.com/JonathanSalwan/Triton/)
-- [AFL](https://github.com/google/AFL)
-- [QSYM](https://github.com/sslab-gatech/qsym)
-- [angr](https://github.com/angr/angr)
-- [RamFuzz](https://github.com/dekimir/RamFuzz)
 - [api-sanity-checker](https://github.com/lvc/api-sanity-checker)
-- [deepstate](https://github.com/trailofbits/deepstate)
+- [SVF](https://github.com/SVF-tools/SVF)
+
 ### 商业软件
 - [Wings](http://www.codewings.net/)
 - [C++test](https://www.parasoft.com/products/ctest/)
 - [VectorCAST/C++](https://www.vector.com/int/en/products/products-a-z/software/vectorcast/vectorcast-c/)
 - [Visual Unit](http://www.kailesoft.com/download/download_detail/23.html)
 
-### 符号执行
-https://github.com/enzet/symbolic-execution
+### 模糊测试&&符号执行
+- [AFL](https://github.com/google/AFL)
+- [RamFuzz](https://github.com/dekimir/RamFuzz)
+- [deepstate](https://github.com/trailofbits/deepstate)
+- [klee](https://github.com/klee/klee)
+- [s2e](https://github.com/S2E/s2e)
+- [symCC](https://github.com/eurecom-s3/symcc)
+- [Triton](https://github.com/JonathanSalwan/Triton/)
+- [QSYM](https://github.com/sslab-gatech/qsym)
+- [angr](https://github.com/angr/angr)
+- [Awesome Symbolic Execution](https://github.com/enzet/symbolic-execution)
 ![](pic/se.png)
+- [Awesome Fuzzing](https://github.com/secfigo/Awesome-Fuzzing)
 
 ## 单元测试编译选项, linux g++可用的
 - -fno-access-control
