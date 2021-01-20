@@ -5,10 +5,16 @@
 #ifdef _WIN32 
 //windows
 #include <windows.h>
+#if defined(__aarch64__) || defined(_M_ARM64) || defined(__arm__) || defined(_M_ARM)
+#include <processthreadsapi.h>
+#endif
 #else
 //linux
 #include <unistd.h>
 #include <sys/mman.h>
+#if defined(__aarch64__) || defined(_M_ARM64) || defined(__arm__) || defined(_M_ARM)
+#include <asm/cachectl.h>
+#endif
 #endif
 //c
 #include <cstddef>
@@ -22,7 +28,11 @@
 /**********************************************************
                   replace function
 **********************************************************/
-
+#ifdef _WIN32 
+#define CACHEFLUSH(addr, size) FlushInstructionCache(GetCurrentProcess(), addr, size)
+#else
+#define CACHEFLUSH(addr, size) cacheflush(addr, size, 0)
+#endif
 
 #if defined(__aarch64__) || defined(_M_ARM64)
     #define CODESIZE 16U
@@ -34,7 +44,8 @@
     #define REPLACE_FAR(t, fn, fn_stub)\
         ((uint32_t*)fn)[0] = 0x58000040 | 9;\
         ((uint32_t*)fn)[1] = 0xd61f0120 | (9 << 5);\
-        *(long long *)(fn + 8) = (long long )fn_stub;
+        *(long long *)(fn + 8) = (long long )fn_stub;\
+        CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__arm__) || defined(_M_ARM)
     #define CODESIZE 8U
@@ -43,7 +54,8 @@
     // ldr pc, [pc, #-4]
     #define REPLACE_FAR(t, fn, fn_stub)\
         ((uint32_t*)fn)[0] = 0xe51ff004;\
-        ((uint32_t*)fn)[1] = (uint32_t)fn_stub;
+        ((uint32_t*)fn)[1] = (uint32_t)fn_stub;\
+        CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__thumb__) || defined(_M_THUMB)
     #error "Thumb is not supported"
