@@ -16,8 +16,18 @@ Call_Constructor:
 Start:
     //The address of the line of code T() obtained by assembly
     char * p = (char*)&&Call_Constructor;//https://gcc.gnu.org/onlinedocs/gcc/Labels-as-Values.html
-    int offset = *(int *)(p + 8);
-    void * ret = p + 12 + offset;
+    //CALL rel32
+	void * ret = 0;
+	char pos;
+	char call = 0xe8;
+	do{
+		pos = *p;
+		if(pos == call)
+		{
+			ret = p + 5 + (*(int*)(p+1));
+		}
+		
+	}while(!ret&&(++p));
     
     return ret;
 }

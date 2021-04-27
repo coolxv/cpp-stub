@@ -3,6 +3,18 @@
 #include "stub.h"
 using namespace std;
 
+template<typename T>
+char* addrof(T addr)
+{
+	union 
+	{
+	  T _s;
+	  char* _d;
+	}ut;
+	ut._s = addr;
+	return ut._d;
+}
+
 
 template<class T>
 void * get_ctor_addr()
@@ -15,17 +27,31 @@ Call_Constructor:
 Start:
     //The address of the line of code T() obtained by assembly
     char * p = nullptr;
+#if 0
     __asm { mov[p], offset Call_Constructor }
-    /*
+	/*
     __asm
     {
         MOV EAX, OFFSET Call_Constructor
         MOV DWORD PTR[p], EAX
     }
     */
-    int offset = *(int *)(p + 4);
-    void * ret = p + 8 + offset;
-    
+#else	
+	p = addrof(&get_ctor_addr<T>);
+#endif
+    //CALL rel32
+	void * ret = 0;
+	char pos;
+	char call = 0xe8;
+	do{
+		pos = *p;
+		if(pos == call)
+		{
+			ret = p + 5 + (*(int*)(p+1));
+		}
+		
+	}while(!ret&&(++p));
+
     return ret;
 }
 
