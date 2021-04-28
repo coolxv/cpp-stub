@@ -21,6 +21,7 @@ SRCS_CXX = test_private_member_function_win.cpp\
 			test_variadic_function.cpp\
 			test_class_member_function.cpp\
 			test_constructor_function_x86_win.cpp\
+			test_dtor_function_x86_win.cpp\
 			test_addr_lambda_win.cpp
 OBJS_CXX = $(SRCS_CXX:.cpp=.obj) 
 TARGET = $(SRCS_CXX:.cpp=)
