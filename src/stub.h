@@ -147,20 +147,32 @@ public:
         fn = addrof(addr);
         fn_stub = addrof(addr_stub);
         struct func_stub *pstub;
-        pstub = new func_stub;
-        //start
-        pstub->fn = fn;
+        std::map<char*,func_stub*>::iterator iter = m_result.find(fn);
 
-        if(distanceof(fn, fn_stub))
+        if (iter == m_result.end())
         {
-            pstub->far_jmp = true;
-            std::memcpy(pstub->code_buf, fn, CODESIZE_MAX);
+            pstub = new func_stub;
+            //start
+            pstub->fn = fn;
+
+            if(distanceof(fn, fn_stub))
+            {
+                pstub->far_jmp = true;
+                std::memcpy(pstub->code_buf, fn, CODESIZE_MAX);
+            }
+            else
+            {
+                pstub->far_jmp = false;
+                std::memcpy(pstub->code_buf, fn, CODESIZE_MIN);
+            }
         }
-        else
-        {
-            pstub->far_jmp = false;
-            std::memcpy(pstub->code_buf, fn, CODESIZE_MIN);
+        else {
+            pstub = iter->second;
+            //start
+            pstub->fn = fn;
+            pstub->far_jmp = distanceof(fn, fn_stub);
         }
+
 
 #ifdef _WIN32
         DWORD lpflOldProtect;
