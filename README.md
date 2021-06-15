@@ -128,7 +128,12 @@ lcov -d build/ -b ../../src2 --no-external -rc lcov_branch_coverage=1 -t ut -c -
 lcov -a ut_1.info -a ut_2.info -o ut.info
 genhtml -o report/ --prefix=`pwd` --branch-coverage --function-coverage ut.info
 ```
+## Code coverage statistics for windows
 
+ [OpenCppCoverage](https://github.com/OpenCppCoverage/OpenCppCoverage)
+```
+OpenCppCoverage.exe --sources MySourcePath* -- YourProgram.exe arg1 arg2
+```
 # Interface description
 
 ## stub.h
