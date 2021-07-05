@@ -85,6 +85,7 @@ A trap is an exception in a user process. It's caused by division by zero or inv
 - doctest https://github.com/onqtam/doctest
 - kmtest https://github.com/SergiusTheBest/kmtest
 - trompeloeil https://github.com/rollbear/trompeloeil
+- FakeIt https://github.com/eranpeer/FakeIt
 
 ## Use Case Auto-test tool
 ### Open source software

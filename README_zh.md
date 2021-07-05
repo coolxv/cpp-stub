@@ -92,6 +92,7 @@
 - doctest https://github.com/onqtam/doctest
 - kmtest https://github.com/SergiusTheBest/kmtest
 - trompeloeil https://github.com/rollbear/trompeloeil
+- FakeIt https://github.com/eranpeer/FakeIt
 
 ## 用例自动测试工具
 ### 开源软件
