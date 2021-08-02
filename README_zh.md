@@ -94,6 +94,7 @@
 - trompeloeil https://github.com/rollbear/trompeloeil
 - FakeIt https://github.com/eranpeer/FakeIt
 - isolate++(免费，但不开源) https://www.typemock.com/isolatorpp-product-page/isolate-pp/
+- 变异测试 https://github.com/RagnarDa/dumbmutate
 
 ## 用例自动测试工具
 ### 开源软件
