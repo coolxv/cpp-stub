@@ -88,7 +88,7 @@ A trap is an exception in a user process. It's caused by division by zero or inv
 - FakeIt https://github.com/eranpeer/FakeIt
 - isolate++(free,but not open source) https://www.typemock.com/isolatorpp-product-page/isolate-pp/
 - Mutation testing https://github.com/RagnarDa/dumbmutate
-
+- Pairwise Testing https://github.com/microsoft/pict
 ## Use Case Auto-test tool
 ### Open source software
 - [api-sanity-checker](https://github.com/lvc/api-sanity-checker)
