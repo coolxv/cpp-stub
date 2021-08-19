@@ -190,7 +190,16 @@ public:
         {
             throw("stub set memory protect to r+x failed");
         }
-        m_result.insert(std::pair<char*,func_stub*>(fn,pstub));
+
+        std::map<char *, func_stub *>::iterator iter = m_result.find(fn);
+        if (iter != m_result.end())
+        {
+            struct func_stub *poldstub = iter->second;
+            m_result.erase(iter);
+            delete poldstub;
+        }
+
+        m_result.insert(std::pair<char *, func_stub *>(fn, pstub));
         return;
     }
 
