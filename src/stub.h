@@ -53,7 +53,6 @@
         CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__mips64)
-    #define CACHEFLUSH(addr, size) __builtin___clear_cache(addr, addr + size)
     #define CODESIZE 80U
     #define CODESIZE_MIN 80U
     #define CODESIZE_MAX CODESIZE
@@ -102,7 +101,7 @@
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__thumb__) || defined(_M_THUMB)
     #error "Thumb is not supported"
-#else //__i386__ _x86_64__
+#else //__i386__ _x86_64__  _M_IX86 _M_X64
     #define CODESIZE 13U
     #define CODESIZE_MIN 5U
     #define CODESIZE_MAX CODESIZE
