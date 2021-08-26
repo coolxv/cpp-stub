@@ -67,6 +67,8 @@
 
 ![](pic/arm64.png)
 
+## Mips64 跳转指令
+![](pic/mips64.png)
 
 # 单元测试相关说明
 ## 不能打桩
@@ -120,7 +122,6 @@ https://github.com/RagnarDa/dumbmutate
 - [QSYM](https://github.com/sslab-gatech/qsym)
 - [angr](https://github.com/angr/angr)
 - [Awesome Symbolic Execution](https://github.com/enzet/symbolic-execution)
-![](pic/se.png)
 - [Awesome Fuzzing](https://github.com/secfigo/Awesome-Fuzzing)
 
 ## 单元测试编译选项, linux g++可用的
@@ -204,7 +205,6 @@ not implement
 #include "stub.h"
 using namespace std;
 
-
 template<class T>
 void * get_ctor_addr(bool start = true)
 {
@@ -223,7 +223,6 @@ Start:
     return ret;
 }
 
-
 class A {
 public:
     A(){cout << "I am A_constructor" << endl;}
@@ -233,7 +232,6 @@ class B {
 public:
     B(){cout << "I am B_constructor" << endl;}
 };
-
 
 int main()
 {
@@ -263,6 +261,87 @@ int main()
   401404:       90                      nop
   401405:       48 c7 45 f8 f6 13 40    movq   $0x4013f6,-0x8(%rbp)
 ......
+
+```
+使用 [capstone](https://github.com/aquynh/capstone) 
+```
+//for linux
+//g++ -g -std=c++11 -c test1.c -o test1.o
+//g++ -g -std=c++11 test1.o -Wall -lcapstone -o test1
+
+#include<iostream>
+#include <stdio.h>
+#include <inttypes.h>
+#include <capstone/capstone.h>
+
+#include "stub.h"
+
+using namespace std;
+
+template<class T>
+void * get_addr(bool start = true)
+{
+    if(start) goto Start;
+Call_Constructor:
+    T();
+Start:        
+    csh handle;
+    cs_insn *insn;
+    size_t count;
+
+    if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK)
+            return 0;
+    count = cs_disasm(handle, (uint8_t*)&&Call_Constructor, (uint8_t*)&&Start-(uint8_t*)&&Call_Constructor, (uint64_t)&&Call_Constructor, 0, &insn);
+    if (count > 0) {
+      size_t j;
+      for (j = 0; j < count; j++) {
+          printf("0x%" PRIx64 ":\t%s\t\t%s\n", insn[j].address, insn[j].mnemonic, insn[j].op_str);
+          if(strcmp(insn[j].mnemonic, "call") == 0){
+              unsigned long ul = std::stoul (insn[j].op_str,nullptr,16);
+              return (void *)ul;
+          }
+      }
+      cs_free(insn, count);
+    } else{
+      printf("ERROR: Failed to disassemble given code!\n");
+    }
+    cs_close(&handle);
+
+    return 0;
+}
+
+
+class A {
+public:
+    A(){cout << "I am A_constructor" << endl;}
+};
+
+class B {
+public:
+    B(){cout << "I am B_constructor" << endl;}
+};
+
+
+int main()
+{
+    Stub stub;
+    auto xa = get_addr<A>();
+    auto xb = get_addr<B>();
+    stub.set(xa, xb);
+    A aa;
+    
+    return 0;
+}
+
+////////////////////
+//  principle
+////////////////////
+0x402abb:       lea             rax, [rbp - 0x51]
+0x402abf:       mov             rdi, rax
+0x402ac2:       call            0x4027ba
+0x402cd8:       lea             rax, [rbp - 0x51]
+0x402cdc:       mov             rdi, rax
+0x402cdf:       call            0x4027e6
 
 ```
 
@@ -1134,7 +1213,14 @@ int main(int argc, char **argv)
 
 ## 动态库里的函数
 
+其实是对PLT打桩，也可以通过dlsym()获取动态库函数地址
+```
+0000000000402040 <printf@plt>:
+  402040:       ff 25 da 5f 00 00       jmpq   *0x5fda(%rip)        # 408020 <printf@GLIBC_2.2.5>
+  402046:       68 01 00 00 00          pushq  $0x1
+  40204b:       e9 d0 ff ff ff          jmpq   402020 <.plt>
 
+```
 ```
 //for linux
 #include<iostream>
@@ -1426,7 +1512,6 @@ int printf_stub(const char * format, ...)
 
 int main(int argc, char **argv)
 {
-
     //Get application static function address
     {
         AddrAny any;
@@ -1466,7 +1551,5 @@ int main(int argc, char **argv)
     return 0;
 
 }
-
-
 
 ```
