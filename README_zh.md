@@ -94,11 +94,8 @@
 - doctest https://github.com/onqtam/doctest
 - kmtest https://github.com/SergiusTheBest/kmtest
 - trompeloeil https://github.com/rollbear/trompeloeil
-- FakeIt https://github.com/eranpeer/FakeIt
-- isolate++(免费，但不开源) https://www.typemock.com/isolatorpp-product-page/isolate-pp/
-- 变异测试 https://github.com/RagnarDa/dumbmutate
-https://github.com/RagnarDa/dumbmutate
-- 因子组合覆盖测试 https://github.com/microsoft/pict
+- FakeIt https://github.com/eranpeer/FakeIt(Mocking Solution)
+- isolate++(Mocking Solution,免费，但不开源) https://www.typemock.com/isolatorpp-product-page/isolate-pp/
 
 ## 用例自动测试工具
 ### 开源软件
@@ -123,6 +120,11 @@ https://github.com/RagnarDa/dumbmutate
 - [angr](https://github.com/angr/angr)
 - [Awesome Symbolic Execution](https://github.com/enzet/symbolic-execution)
 - [Awesome Fuzzing](https://github.com/secfigo/Awesome-Fuzzing)
+### 变异测试
+- [dumbmutate](https://github.com/RagnarDa/dumbmutate)
+
+### 因子组合覆盖测试
+- [pict](https://github.com/microsoft/pict)
 
 ## 单元测试编译选项, linux g++可用的
 - -fno-access-control
@@ -132,6 +134,7 @@ https://github.com/RagnarDa/dumbmutate
 - -no-pie -fno-stack-protector
 - -fprofile-arcs
 - -ftest-coverage
+
 
 ## 代码覆盖率, linux g++使用方法
 ```

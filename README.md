@@ -87,10 +87,9 @@ A trap is an exception in a user process. It's caused by division by zero or inv
 - doctest https://github.com/onqtam/doctest
 - kmtest https://github.com/SergiusTheBest/kmtest
 - trompeloeil https://github.com/rollbear/trompeloeil
-- FakeIt https://github.com/eranpeer/FakeIt
-- isolate++(free,but not open source) https://www.typemock.com/isolatorpp-product-page/isolate-pp/
-- Mutation testing https://github.com/RagnarDa/dumbmutate
-- Pairwise Testing https://github.com/microsoft/pict
+- FakeIt https://github.com/eranpeer/FakeIt(Mocking Solution)
+- isolate++(Mocking Solution,free,but not open source) https://www.typemock.com/isolatorpp-product-page/isolate-pp/
+
 ## Use Case Auto-test tool
 ### Open source software
 - [api-sanity-checker](https://github.com/lvc/api-sanity-checker)
@@ -114,6 +113,12 @@ A trap is an exception in a user process. It's caused by division by zero or inv
 - [angr](https://github.com/angr/angr)
 - [Awesome Symbolic Execution](https://github.com/enzet/symbolic-execution)
 - [Awesome Fuzzing](https://github.com/secfigo/Awesome-Fuzzing)
+
+###  Mutation Testing 
+- [dumbmutate](https://github.com/RagnarDa/dumbmutate)
+
+### Pairwise Testing 
+- [pict](https://github.com/microsoft/pict)
 
 ## Unit test compilation option for linux g++
 - -fno-access-control
