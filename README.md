@@ -61,7 +61,7 @@ A trap is an exception in a user process. It's caused by division by zero or inv
 ![](pic/arm32.png)
 
 ![](pic/arm64.png)
-## Mips64 跳转指令
+## Mips64 jmp instruction
 ![](pic/mips64.png)
 
 # Description of the unit test
