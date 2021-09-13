@@ -173,6 +173,16 @@ public:
                     std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
                 }
 
+#if defined(__aarch64__) || defined(_M_ARM64)
+                CACHEFLUSH(pstub->fn, CODESIZE);
+#elif defined(__arm__) || defined(_M_ARM)
+                CACHEFLUSH(pstub->fn, CODESIZE);
+#elif defined(__mips64)
+                CACHEFLUSH(pstub->fn, CODESIZE);
+#else //__i386__ _x86_64__  _M_IX86 _M_X64
+                //CACHEFLUSH(pstub->fn, CODESIZE);
+#endif
+
 #ifdef _WIN32
                 VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect);
 #else
@@ -276,6 +286,15 @@ public:
             std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
         }
 
+#if defined(__aarch64__) || defined(_M_ARM64)
+                CACHEFLUSH(pstub->fn, CODESIZE);
+#elif defined(__arm__) || defined(_M_ARM)
+                CACHEFLUSH(pstub->fn, CODESIZE);
+#elif defined(__mips64)
+                CACHEFLUSH(pstub->fn, CODESIZE);
+#else //__i386__ _x86_64__  _M_IX86 _M_X64
+                //CACHEFLUSH(pstub->fn, CODESIZE);
+#endif
 
 #ifdef _WIN32
         if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect))
