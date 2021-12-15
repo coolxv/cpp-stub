@@ -16,7 +16,10 @@
 #include <cstring>
 //c++
 #include <map>
-
+//valgrind
+#ifdef __VALGRIND__
+#include <valgrind/valgrind.h>
+#endif
 
 #define ADDR(CLASS_NAME,MEMBER_NAME) (&CLASS_NAME::MEMBER_NAME)
 
@@ -167,10 +170,18 @@ public:
                 if(pstub->far_jmp)
                 {
                     std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
+#ifdef __VALGRIND__
+                    //discard valgrind translation cache.
+                    VALGRIND_DISCARD_TRANSLATIONS(pstub->fn, CODESIZE_MAX);
+#endif
                 }
                 else
                 {
                     std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
+#ifdef __VALGRIND__
+                    //discard valgrind translation cache.
+                    VALGRIND_DISCARD_TRANSLATIONS(pstub->fn, CODESIZE_MIN);
+#endif
                 }
 
 #if defined(__aarch64__) || defined(_M_ARM64)
@@ -280,10 +291,18 @@ public:
         if(pstub->far_jmp)
         {
             std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
+#ifdef __VALGRIND__
+            //discard valgrind translation cache.
+            VALGRIND_DISCARD_TRANSLATIONS(pstub->fn, CODESIZE_MAX);
+#endif
         }
         else
         {
             std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
+#ifdef __VALGRIND__
+            //discard valgrind translation cache.
+            VALGRIND_DISCARD_TRANSLATIONS(pstub->fn, CODESIZE_MIN);
+#endif
         }
 
 #if defined(__aarch64__) || defined(_M_ARM64)
