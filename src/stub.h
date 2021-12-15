@@ -16,9 +16,13 @@
 #include <cstring>
 //c++
 #include <map>
-
+//valgrind
+#ifdef __VALGRIND__
+#include <valgrind/valgrind.h>
+#endif
 
 #define ADDR(CLASS_NAME,MEMBER_NAME) (&CLASS_NAME::MEMBER_NAME)
+
 
 /**********************************************************
                   replace function
@@ -27,6 +31,12 @@
 #define CACHEFLUSH(addr, size) FlushInstructionCache(GetCurrentProcess(), addr, size)
 #else
 #define CACHEFLUSH(addr, size) __builtin___clear_cache(addr, addr + size)
+#endif
+
+#ifdef __VALGRIND__
+#define VALGRIND_CACHE_FLUSH(addr, size) VALGRIND_DISCARD_TRANSLATIONS(addr, size)
+#else
+#define VALGRIND_CACHE_FLUSH(addr, size)
 #endif
 
 #if defined(__aarch64__) || defined(_M_ARM64)
@@ -40,7 +50,8 @@
         ((uint32_t*)fn)[0] = 0x58000040 | 9;\
         ((uint32_t*)fn)[1] = 0xd61f0120 | (9 << 5);\
         *(long long *)(fn + 8) = (long long )fn_stub;\
-        CACHEFLUSH((char *)fn, CODESIZE);
+        CACHEFLUSH((char *)fn, CODESIZE);\
+        VALGRIND_CACHE_FLUSH(fn, CODESIZE)
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__arm__) || defined(_M_ARM)
     #define CODESIZE 8U
@@ -50,7 +61,8 @@
     #define REPLACE_FAR(t, fn, fn_stub)\
         ((uint32_t*)fn)[0] = 0xe51ff004;\
         ((uint32_t*)fn)[1] = (uint32_t)fn_stub;\
-        CACHEFLUSH((char *)fn, CODESIZE);
+        CACHEFLUSH((char *)fn, CODESIZE);\
+        VALGRIND_CACHE_FLUSH(fn, CODESIZE)
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__mips64)
     #define CODESIZE 80U
@@ -97,7 +109,8 @@
         ((uint32_t *)fn)[17] = 0x67bd0020;\
         ((uint32_t *)fn)[18] = 0x03e00008;\
         ((uint32_t *)fn)[19] = 0x00000000;\
-        CACHEFLUSH((char *)fn, CODESIZE);
+        CACHEFLUSH((char *)fn, CODESIZE);\
+        VALGRIND_CACHE_FLUSH(fn, CODESIZE)
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__thumb__) || defined(_M_THUMB)
     #error "Thumb is not supported"
@@ -115,12 +128,14 @@
         *(fn + 10) = 0x41;\
         *(fn + 11) = 0xff;\
         *(fn + 12) = 0xe3;\
+        VALGRIND_CACHE_FLUSH(fn, CODESIZE)\
         //CACHEFLUSH((char *)fn, CODESIZE);
 
     //5 byte(jmp rel32)
     #define REPLACE_NEAR(t, fn, fn_stub)\
         *fn = 0xE9;\
         *(int *)(fn + 1) = (int)(fn_stub - fn - CODESIZE_MIN);\
+        VALGRIND_CACHE_FLUSH(fn, CODESIZE)\
         //CACHEFLUSH((char *)fn, CODESIZE);
 #endif
 
@@ -167,10 +182,14 @@ public:
                 if(pstub->far_jmp)
                 {
                     std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
+                    //discard valgrind translation cache.
+                    VALGRIND_CACHE_FLUSH(pstub->fn, CODESIZE_MAX);
                 }
                 else
                 {
                     std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
+                    //discard valgrind translation cache.
+                    VALGRIND_CACHE_FLUSH(pstub->fn, CODESIZE_MIN);
                 }
 
 #if defined(__aarch64__) || defined(_M_ARM64)
@@ -280,10 +299,14 @@ public:
         if(pstub->far_jmp)
         {
             std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
+            //discard valgrind translation cache.
+            VALGRIND_CACHE_FLUSH(pstub->fn, CODESIZE_MAX);
         }
         else
         {
             std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
+            //discard valgrind translation cache.
+            VALGRIND_CACHE_FLUSH(pstub->fn, CODESIZE_MIN);
         }
 
 #if defined(__aarch64__) || defined(_M_ARM64)
