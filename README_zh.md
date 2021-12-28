@@ -38,7 +38,7 @@
 
 - Trap hook
 
-陷阱就是用户态的异常，比如除灵零操作和访问无效内存等，还有系统调用也是。
+陷阱就是用户态的异常，比如除零操作和访问无效内存等，还有系统调用也是。
 
 [ptrace](https://man7.org/linux/man-pages/man2/ptrace.2.html)
 
