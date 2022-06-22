@@ -122,6 +122,7 @@
 - [Awesome Fuzzing](https://github.com/secfigo/Awesome-Fuzzing)
 ### 变异测试
 - [dumbmutate](https://github.com/RagnarDa/dumbmutate)
+- [mull](https://github.com/mull-project/mull)
 
 ### 因子组合覆盖测试
 - [pict](https://github.com/microsoft/pict)
