@@ -116,6 +116,7 @@ A trap is an exception in a user process. It's caused by division by zero or inv
 
 ###  Mutation Testing 
 - [dumbmutate](https://github.com/RagnarDa/dumbmutate)
+- [mull](https://github.com/mull-project/mull)
 
 ### Pairwise Testing 
 - [pict](https://github.com/microsoft/pict)
