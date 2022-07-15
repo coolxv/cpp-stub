@@ -96,6 +96,7 @@
 - trompeloeil https://github.com/rollbear/trompeloeil
 - FakeIt https://github.com/eranpeer/FakeIt(Mocking Solution)
 - isolate++(Mocking Solution,免费，但不开源) https://www.typemock.com/isolatorpp-product-page/isolate-pp/
+- mockcpp https://github.com/sinojelly/mockcpp
 
 ## 用例自动测试工具
 ### 开源软件
