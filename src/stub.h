@@ -1,7 +1,6 @@
 #ifndef __STUB_H__
 #define __STUB_H__
 
-
 #ifdef _WIN32 
 //windows
 #include <windows.h>
@@ -52,6 +51,24 @@
         ((uint32_t*)fn)[1] = (uint32_t)fn_stub;\
         CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
+#elif defined(__thumb__) || defined(_M_THUMB)
+    #define CODESIZE 12
+    #define CODESIZE_MIN 12
+    #define CODESIZE_MAX CODESIZE
+    // NOP
+    // LDR.W PC, [PC]
+    #define REPLACE_FAR(t, fn, fn_stub)\
+        uint32_t clearBit0 = fn & 0xfffffffe;\
+        char *f = (char *)clearBit0;\
+        if (clearBit0 % 4 != 0) {\
+            *(uint16_t *)&f[0] = 0xbe00;\
+        }\
+        *(uint16_t *)&f[2] = 0xf8df;\
+        *(uint16_t *)&f[4] = 0xf000;\
+        *(uint16_t *)&f[6] = (uint16_t)(fn_stub & 0xffff);\
+        *(uint16_t *)&f[8] = (uint16_t)(fn_stub >> 16);\
+        CACHEFLUSH((char *)f, CODESIZE);
+    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__mips64)
     #define CODESIZE 80U
     #define CODESIZE_MIN 80U
@@ -99,8 +116,7 @@
         ((uint32_t *)fn)[19] = 0x00000000;\
         CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
-#elif defined(__thumb__) || defined(_M_THUMB)
-    #error "Thumb is not supported"
+
 #else //__i386__ _x86_64__  _M_IX86 _M_X64
     #define CODESIZE 13U
     #define CODESIZE_MIN 5U
@@ -115,13 +131,13 @@
         *(fn + 10) = 0x41;\
         *(fn + 11) = 0xff;\
         *(fn + 12) = 0xe3;\
-        //CACHEFLUSH((char *)fn, CODESIZE);
+        CACHEFLUSH((char *)fn, CODESIZE);
 
     //5 byte(jmp rel32)
     #define REPLACE_NEAR(t, fn, fn_stub)\
         *fn = 0xE9;\
         *(int *)(fn + 1) = (int)(fn_stub - fn - CODESIZE_MIN);\
-        //CACHEFLUSH((char *)fn, CODESIZE);
+        CACHEFLUSH((char *)fn, CODESIZE);
 #endif
 
 struct func_stub
@@ -173,15 +189,7 @@ public:
                     std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
                 }
 
-#if defined(__aarch64__) || defined(_M_ARM64)
                 CACHEFLUSH(pstub->fn, CODESIZE);
-#elif defined(__arm__) || defined(_M_ARM)
-                CACHEFLUSH(pstub->fn, CODESIZE);
-#elif defined(__mips64)
-                CACHEFLUSH(pstub->fn, CODESIZE);
-#else //__i386__ _x86_64__  _M_IX86 _M_X64
-                //CACHEFLUSH(pstub->fn, CODESIZE);
-#endif
 
 #ifdef _WIN32
                 VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect);
@@ -239,7 +247,6 @@ public:
             REPLACE_NEAR(this, fn, fn_stub);
         }
 
-
 #ifdef _WIN32
         if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect))
 #else
@@ -286,15 +293,8 @@ public:
             std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
         }
 
-#if defined(__aarch64__) || defined(_M_ARM64)
-                CACHEFLUSH(pstub->fn, CODESIZE);
-#elif defined(__arm__) || defined(_M_ARM)
-                CACHEFLUSH(pstub->fn, CODESIZE);
-#elif defined(__mips64)
-                CACHEFLUSH(pstub->fn, CODESIZE);
-#else //__i386__ _x86_64__  _M_IX86 _M_X64
-                //CACHEFLUSH(pstub->fn, CODESIZE);
-#endif
+        CACHEFLUSH(pstub->fn, CODESIZE);
+
 
 #ifdef _WIN32
         if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect))
