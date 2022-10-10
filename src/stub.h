@@ -118,12 +118,38 @@
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 
 #elif defined(__riscv) 
-    #define CODESIZE 8U
+    #define CODESIZE 36U
     #define CODESIZE_MIN 8U
     #define CODESIZE_MAX CODESIZE
-     // absolute offset(64), not supported 
-    #define REPLACE_FAR(t, fn, fn_stub)
-
+     // absolute offset(64)
+    #define REPLACE_FAR(t, fn, fn_stub)\
+          unsigned long long tmp = (long long)fn_stub;\
+          unsigned int tmp32h = (unsigned int)((tmp & 0xffffffff00000000)>>32);\
+          unsigned int tmp20 = tmp32h & 0xfffff000;\
+          unsigned int lui = tmp20 + 0x337;\
+          *(unsigned int *)(fn + 4 * 0) = lui;\
+          unsigned int tmp12 = (tmp32h & 0xfff) << 20;\
+          unsigned int addi = tmp12 + 0x30313;\
+          *(unsigned int *)(fn + 4 * 1) = addi;\
+          unsigned int slli = 0x00c31313;\
+          *(unsigned int *)(fn + 4 * 2) = slli;\
+          unsigned int tmp32l = (unsigned int)(tmp & 0xffffffff);\
+          tmp12 = (tmp32l & 0xfff00000);\
+          addi = tmp12 + 0x30313;\
+          *(unsigned int *)(fn + 4 * 3) = addi;\
+          slli = 0x00c31313;\
+          *(unsigned int *)(fn + 4 * 4) = slli;\
+          tmp12 = (tmp32l & 0x000fff00) << 12;\
+          addi = tmp12 + 0x30313;\
+          *(unsigned int *)(fn + 4 * 5) = addi;\
+          slli = 0x00831313;\
+          *(unsigned int *)(fn + 4 * 6) = slli;\
+          unsigned int tmp8 = (tmp32l & 0xff) << 20;\
+          addi = tmp8 + 0x30313;\
+          *(unsigned int *)(fn + 4 * 7) = addi;\
+          unsigned int jalr = 0x00030067;\
+          *(unsigned int *)(fn + 4 * 8) = jalr;\
+          CACHEFLUSH((char *)fn, CODESIZE);
     // relative offset(32)
     //auipc t1, uimm20
     //jalr x0, t1, simm12
