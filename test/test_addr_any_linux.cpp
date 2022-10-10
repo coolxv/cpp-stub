@@ -55,17 +55,17 @@ int main(int argc, char **argv)
 #else
         any.get_weak_func_addr_dynsym("^puts", result);
 #endif
-        
-        foo();
-        Stub stub;
-        std::map<std::string,void*>::iterator it;
-        for (it=result.begin(); it!=result.end(); ++it)
         {
-            stub.set(it->second ,printf_stub);
-            std::cout << it->first << " => " << it->second << std::endl;
+            foo();
+            Stub stub;
+            std::map<std::string,void*>::iterator it;
+            for (it=result.begin(); it!=result.end(); ++it)
+            {
+                stub.set(it->second ,printf_stub);
+                std::cout << it->first << " => " << it->second << std::endl;
+            }
+            foo();
         }
-        foo();
-        stub.reset();
         foo();
     }
     return 0;
