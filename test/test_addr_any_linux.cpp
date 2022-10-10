@@ -47,8 +47,8 @@ int main(int argc, char **argv)
     }
     //Get dynamic library static function address
     {
-        AddrAny any("libc-2.27.so");// cat /proc/pid/maps
-        
+        //AddrAny any("libc-2.27.so");// cat /proc/pid/maps
+        AddrAny any("libc.so.6");// cat /proc/pid/maps     
         std::map<std::string,void*> result;
 #ifdef __clang__ 
         any.get_global_func_addr_dynsym("^printf$", result);
@@ -64,6 +64,8 @@ int main(int argc, char **argv)
             stub.set(it->second ,printf_stub);
             std::cout << it->first << " => " << it->second << std::endl;
         }
+        foo();
+        stub.reset();
         foo();
     }
     return 0;
