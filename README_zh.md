@@ -13,9 +13,9 @@
 - src_win/addr_any.h(仅适合 windows) 基于C++98开发; 使用 dbghelp 库查询PDB文件的符号表获取函数的地址; 主要解决静态函数地址获取问题，前提编译时得包含调试信息 (相关参考:[symbol-files](https://docs.microsoft.com/zh-cn/windows/desktop/Debug/symbol-files)、[dbghelpexamples](http://www.debuginfo.com/examples/dbghelpexamples.html)、[pelib](http://www.pelib.com/index.php))
 - 使用时linux和windows还是有差别的, 主要涉及桩函数的写法, 还有原函数地址获取的方法不同; 获取虚函数的地址方法就不同，主要是C++ABI不兼容, 编译器支持不同(相关参考: [cxx-abi](https://itanium-cxx-abi.github.io/cxx-abi/abi.html#vtable))
 - 支持的操作系统 : windows,linux
-- 支持的硬件平台 : x86,x86-64,arm64,arm32,arm thumb,mips64
+- 支持的硬件平台 : x86,x86-64,arm64,arm32,arm thumb,mips64,riscv32,riscv64
 - 支持的编译器 : msvc,gcc,clang
-- 未来计划支持 : MacOS, RISC-V
+- 未来计划支持 : MacOS
 
 ## GOT/PLT Hook 、 Trap Hook 对比 Inline Hook
 
