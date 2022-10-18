@@ -6,7 +6,7 @@
 #include <windows.h>
 #include <processthreadsapi.h>
 #else
-//linux
+//linux or macos
 #include <unistd.h>
 #include <sys/mman.h>
 #endif
