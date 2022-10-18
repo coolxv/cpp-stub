@@ -7,7 +7,7 @@
 - 如何用桩函数替换原函数(**stub.h**)
 
 ## 支持情况
-- 支持的操作系统 : windows,linux，MacOS（x86-64)
+- 支持的操作系统 : windows,linux，MacOS(x86-64, printf '\x07' | dd of=test_function bs=1 seek=160 count=1 conv=notrunc)
 - 支持的硬件平台 : x86,x86-64,arm64,arm32,arm thumb,mips64,riscv32,riscv64
 - 支持的编译器 : msvc,gcc,clang
 - 支持函数类型：

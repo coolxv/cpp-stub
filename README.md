@@ -6,7 +6,7 @@
 - How to replace the original function with stub function (**stub.h**)
 
 ## Supported
-- Supported operating systems  : windows,linux,，MacOS（x86-64)
+- Supported operating systems  : windows,linux,MacOS(x86-64, printf '\x07' | dd of=test_function bs=1 seek=160 count=1 conv=notrunc)
 - Supported hardware platform  : x86,x86-64,arm64,arm32,arm thumb,mips64,riscv32,riscv64
 - Supported compiler           : msvc,gcc,clang
 - Support function type
@@ -48,7 +48,7 @@
 ## Cannot stub
 - Can't stub the exit function, the compiler has made special optimizations.
 - Can't stub pure virtual functions, pure virtual functions not have the address.
-- Can't stub lambda functions, lambda functions not get the address.
+- Can't stub lambda functions, lambda functions not get the address.(You can try to use addr_any.h api.)
 - Can't stub static functions, static function address is not visible.(You can try to use addr_any.h api.)
 
 
