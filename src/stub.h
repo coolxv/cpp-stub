@@ -118,38 +118,26 @@
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 
 #elif defined(__riscv) 
-    #define CODESIZE 36U
+    #define CODESIZE 24U
     #define CODESIZE_MIN 8U
     #define CODESIZE_MAX CODESIZE
-     // absolute offset(64)
+    // absolute offset(64)
+    // auipc t1,0
+    // addi t1, t1, 16
+    // ld t1,0(t1)
+    // jalr x0, t1, 0
+    // addr
     #define REPLACE_FAR(t, fn, fn_stub)\
-          unsigned long long tmp = (long long)fn_stub;\
-          unsigned int tmp32h = (unsigned int)((tmp & 0xffffffff00000000)>>32);\
-          unsigned int tmp20 = tmp32h & 0xfffff000;\
-          unsigned int lui = tmp20 + 0x337;\
-          *(unsigned int *)(fn + 4 * 0) = lui;\
-          unsigned int tmp12 = (tmp32h & 0xfff) << 20;\
-          unsigned int addi = tmp12 + 0x30313;\
-          *(unsigned int *)(fn + 4 * 1) = addi;\
-          unsigned int slli = 0x00c31313;\
-          *(unsigned int *)(fn + 4 * 2) = slli;\
-          unsigned int tmp32l = (unsigned int)(tmp & 0xffffffff);\
-          tmp12 = (tmp32l & 0xfff00000);\
-          addi = tmp12 + 0x30313;\
-          *(unsigned int *)(fn + 4 * 3) = addi;\
-          slli = 0x00c31313;\
-          *(unsigned int *)(fn + 4 * 4) = slli;\
-          tmp12 = (tmp32l & 0x000fff00) << 12;\
-          addi = tmp12 + 0x30313;\
-          *(unsigned int *)(fn + 4 * 5) = addi;\
-          slli = 0x00831313;\
-          *(unsigned int *)(fn + 4 * 6) = slli;\
-          unsigned int tmp8 = (tmp32l & 0xff) << 20;\
-          addi = tmp8 + 0x30313;\
-          *(unsigned int *)(fn + 4 * 7) = addi;\
-          unsigned int jalr = 0x00030067;\
-          *(unsigned int *)(fn + 4 * 8) = jalr;\
-          CACHEFLUSH((char *)fn, CODESIZE);
+        unsigned int auipc = 0x317;
+        *(unsigned int *)(fn) = auipc;
+        unsigned int addi = 0x1030313;
+        *(unsigned int *)(fn + 4) = addi;
+        unsigned int ld = 0x33303;
+        *(unsigned int *)(fn + 8) = ld;
+        unsigned int jalr = 0x30067;
+        *(unsigned int *)(fn + 12) = jalr;
+        *(unsigned long long*)(fn + 16) = (unsigned long long)fn_stub;
+        CACHEFLUSH((char *)fn, CODESIZE);
     // relative offset(32)
     //auipc t1, uimm20
     //jalr x0, t1, simm12
