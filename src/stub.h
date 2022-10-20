@@ -128,15 +128,15 @@
     // jalr x0, t1, 0
     // addr
     #define REPLACE_FAR(t, fn, fn_stub)\
-        unsigned int auipc = 0x317;
-        *(unsigned int *)(fn) = auipc;
-        unsigned int addi = 0x1030313;
-        *(unsigned int *)(fn + 4) = addi;
-        unsigned int ld = 0x33303;
-        *(unsigned int *)(fn + 8) = ld;
-        unsigned int jalr = 0x30067;
-        *(unsigned int *)(fn + 12) = jalr;
-        *(unsigned long long*)(fn + 16) = (unsigned long long)fn_stub;
+        unsigned int auipc = 0x317;\
+        *(unsigned int *)(fn) = auipc;\
+        unsigned int addi = 0x1030313;\
+        *(unsigned int *)(fn + 4) = addi;\
+        unsigned int ld = 0x33303;\
+        *(unsigned int *)(fn + 8) = ld;\
+        unsigned int jalr = 0x30067;\
+        *(unsigned int *)(fn + 12) = jalr;\
+        *(unsigned long long*)(fn + 16) = (unsigned long long)fn_stub;\
         CACHEFLUSH((char *)fn, CODESIZE);
     // relative offset(32)
     //auipc t1, uimm20
