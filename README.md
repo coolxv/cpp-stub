@@ -7,7 +7,7 @@
 
 ## Supported
 - Supported operating systems  : windows,linux,MacOS(x86-64, printf '\x07' | dd of=test_function bs=1 seek=160 count=1 conv=notrunc)
-- Supported hardware platform  : x86,x86-64,arm64,arm32,arm thumb,mips64,riscv32,riscv64
+- Supported hardware platform  : x86,x86-64,arm64,arm32,arm thumb,mips64,riscv32,riscv64,loongarch64
 - Supported compiler           : msvc,gcc,clang
 - Support function type
   * [x] normal function

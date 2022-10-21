@@ -162,6 +162,34 @@
         CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 
+#elif defined(__loongarch64) 
+    #define CODESIZE 20U
+    #define CODESIZE_MIN 20U
+    #define CODESIZE_MAX CODESIZE
+    // absolute offset(64)
+    // PCADDI rd, si20 | 0 0 0 1 1 0 0 si20 rd
+    // LD.D rd, rj, si12 | 0 0 1 0 1 0 0 0 1 1 si12 rj rd
+    // JIRL rd, rj, offs | 0 1 0 0 1 1 offs[15:0] rj rd
+    // addr
+    #define REPLACE_FAR(t, fn, fn_stub)\
+        unsigned int rd = 17;\
+        unsigned int off = 12 >> 2;\
+        unsigned int pcaddi = 0x0c << (32 - 7) | off << 5 | rd ;\
+        rd = 17;\
+        int rj = 17;\
+        off = 0;\
+        unsigned int ld_d = 0xa3 << 22 | off << 10 | rj << 5 | rd ;\
+        rd = 0;\
+        rj = 17;\
+        off = 0;\
+        unsigned int jirl = 0x13 << 26 | off << 10 | rj << 5| rd;\
+        *(unsigned int *)fn = pcaddi;\
+        *(unsigned int *)(fn + 4) = ld_d;\
+        *(unsigned int *)(fn + 8) = jirl;\
+        *(unsigned long long*)(fn + 12) = (unsigned long long)fn_stub;\
+        CACHEFLUSH((char *)fn, CODESIZE);
+    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
+
 #else //__i386__ _x86_64__  _M_IX86 _M_X64
     #define CODESIZE 13U
     #define CODESIZE_MIN 5U
