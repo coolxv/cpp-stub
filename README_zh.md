@@ -1,15 +1,35 @@
 [中文](README_zh.md)|[English](README.md)
 
-
 # 原理介绍
-## 两个核心点
+
 - 如何获取原函数的地址(**addr_pri.h**、**addr_any.h**)
 - 如何用桩函数替换原函数(**stub.h**)
 
-## 支持情况
-- 支持的操作系统 : windows,linux，MacOS(x86-64, printf '\x07' | dd of=test_function bs=1 seek=160 count=1 conv=notrunc)
-- 支持的硬件平台 : x86,x86-64,arm64,arm32,arm thumb,mips64,riscv32,riscv64,loongarch64
-- 支持的编译器 : msvc,gcc,clang
+# 支持情况
+- 支持的操作系统 :
+  * [x] Windows
+  * [x] Linux
+  * [x] MacOS(x86-64, printf '\x07' | dd of=test_function bs=1 seek=160 count=1 conv=notrunc)
+
+- 支持的硬件平台 :
+  * [x] x86
+  * [x] x86-64
+  * [x] arm32
+  * [x] arm64
+  * [x] arm thumb
+  * [x] riscv32
+  * [x] riscv64
+  * [x] loongarch64
+  * [x] mips64
+  * [ ] ppc64
+  * [ ] alpha 
+  * [ ] sparc
+
+- 支持的编译器 : 
+  * [x] msvc
+  * [x] gcc
+  * [x] clang
+
 - 支持函数类型：
   * [x] 常规函数
   * [x] 可变参函数
@@ -27,22 +47,6 @@
   * [x] 仿函数
   * [x] 类的私有成员函数(使用 addr_pri.h)
 
-  
-
-## Inline Hook
-
-![](pic/inline.png)
-
-
-- x86/x64 跳转指令
-![](pic/intel.png)
-- aarch32/aarch64 跳转指令
-![](pic/arm32.png)
-![](pic/arm64.png)
-- mips64 跳转指令
-![](pic/mips64.png)
-- riscv 跳转指令
-![](pic/riscv.png)
 
 # 单元测试相关说明
 ## 不能打桩
