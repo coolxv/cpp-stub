@@ -6,10 +6,28 @@
 - How to replace the original function with stub function (**stub.h**)
 
 ## Supported
-- Supported operating systems  : windows,linux,MacOS(x86-64, printf '\x07' | dd of=test_function bs=1 seek=160 count=1 conv=notrunc)
-- Supported hardware platform  : x86,x86-64,arm64,arm32,arm thumb,mips64,riscv32,riscv64,loongarch64
-- Supported compiler           : msvc,gcc,clang
-- Support function type
+- Supported operating systems:
+  * [x] Windows
+  * [x] Linux
+  * [x] MacOS(x86-64, printf '\x07' | dd of=test_function bs=1 seek=160 count=1 conv=notrunc)
+- Supported hardware platform: 
+  * [x] x86
+  * [x] x86-64
+  * [x] arm32
+  * [x] arm64
+  * [x] arm thumb
+  * [x] riscv32
+  * [x] riscv64
+  * [x] loongarch64
+  * [x] mips64
+  * [ ] ppc64
+  * [ ] alpha 
+  * [ ] sparc
+- Supported compiler: 
+  * [x] msvc
+  * [x] gcc
+  * [x] clang
+- Support function type:
   * [x] normal function
   * [x] variadic function
   * [x] template function
@@ -27,22 +45,7 @@
   * [x] private member function(use addr_pri.h)
 
 
-## Inline Hook
 
-![](pic/inline.png)
-
-
-- x86/x64
-![](pic/intel.png)
-
-- aarch32/aarch64
-![](pic/arm32.png)
-
-![](pic/arm64.png)
-- mips64
-![](pic/mips64.png)
-- riscv 
-![](pic/riscv.png)
 
 # Description of the unit test
 ## Cannot stub
