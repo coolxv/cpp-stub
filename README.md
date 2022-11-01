@@ -1,11 +1,10 @@
 [中文](README_zh.md)|[English](README.md)
 
 # Principle
-## Two core points
 - How to get the original function address (**addr_pri.h**, **addr_any.h**)
 - How to replace the original function with stub function (**stub.h**)
 
-## Supported
+# Supported
 - Supported operating systems:
   * [x] Windows
   * [x] Linux
