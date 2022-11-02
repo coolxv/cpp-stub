@@ -39,7 +39,7 @@
   * [x] [member function](test/test_class_member_function.cpp)
   * [x] [static member function](test/test_object_member_function_linux.cpp)
   * [x] [virtual function(not pure)](test/test_virtual_function_linux.cpp)
-  * [x] [virtual and overload function]((test/test_virtual_overload_function_linux.cpp))
+  * [x] [virtual and overload function](test/test_virtual_overload_function_linux.cpp)
   * [x] [functor](test/test_functor_linux.cpp)
   * [x] [private member function(use addr_pri.h)](test/test_private_member_function_linux.cpp)
 
