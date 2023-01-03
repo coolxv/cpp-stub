@@ -24,6 +24,7 @@
   * [ ] ppc64
   * [ ] alpha 
   * [ ] sparc
+  * [ ] sw_64 
 
 - 支持的编译器 : 
   * [x] msvc

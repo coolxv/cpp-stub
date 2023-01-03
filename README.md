@@ -22,6 +22,7 @@
   * [ ] ppc64
   * [ ] alpha 
   * [ ] sparc
+  * [ ] sw_64  
 - Supported compiler: 
   * [x] msvc
   * [x] gcc
