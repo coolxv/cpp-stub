@@ -31,7 +31,7 @@ template struct ThiefMember<Bank_t, &Bank_t::id, &Bank_t::name, &Bank_t::money>;
 
 std::string money_stub(void *)
 {
-	return "10000$";
+    return "10000$";
 }
 
 int main(void) {
@@ -47,12 +47,11 @@ int main(void) {
     std::cout << "money: " << money << std::endl;
     bank.set_id(2);
     std::cout << "id: " << id << std::endl;
-	Stub stub;
-	auto money_ptr = (void*)(bank.*(std::get<2>(tp)));
-	stub.set(money_ptr, money_stub);
-	auto money_stub = (bank.*(std::get<2>(tp)))(); // 10000$
+    Stub stub;
+    auto money_ptr = (void*)(bank.*(std::get<2>(tp)));
+    stub.set(money_ptr, money_stub);
+    auto money_stub = (bank.*(std::get<2>(tp)))(); // 10000$
     std::cout << "money_stub: " << money_stub << std::endl;
-
-		
-	return 0;
+	
+    return 0;
 }
