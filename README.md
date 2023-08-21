@@ -37,12 +37,13 @@
   * [x] inline function(use compiler options)
   * [x] [constructor function](test/test_constructor_function_linux.cpp)
   * [x] [destructor function](test/test_dtor_function_linux.cpp)
-  * [x] [member function](test/test_class_member_function.cpp)
-  * [x] [static member function](test/test_object_member_function_linux.cpp)
+  * [x] [member function](test/test_object_member_function_linux.cpp)
+  * [x] [static member function](test/test_class_member_function.cpp)
   * [x] [virtual function(not pure)](test/test_virtual_function_linux.cpp)
   * [x] [virtual and overload function](test/test_virtual_overload_function_linux.cpp)
   * [x] [functor](test/test_functor_linux.cpp)
   * [x] [private member function(use addr_pri.h)](test/test_private_member_function_linux.cpp)
+  * [x] [private member function(cpp17)](test_cpp17/test_private_member.cpp)
 
 
 

@@ -41,17 +41,18 @@
   * [x] 内联函数(通过编译选项)
   * [x] [类的构造函数](test/test_constructor_function_linux.cpp)
   * [x] [类的析构函数](test/test_dtor_function_linux.cpp)
-  * [x] [类的成员函数](test/test_class_member_function.cpp)
-  * [x] [类的静态成员函数](test/test_object_member_function_linux.cpp)
+  * [x] [类的成员函数](test/test_object_member_function_linux.cpp)
+  * [x] [类的静态成员函数](test/test_class_member_function.cpp)
   * [x] [类的成员虚函数(非纯虚函数)](test/test_virtual_function_linux.cpp)
   * [x] [类的虚函数并且重载](test/test_virtual_overload_function_linux.cpp)
   * [x] [仿函数](test/test_functor_linux.cpp)
   * [x] [类的私有成员函数(使用 addr_pri.h)](test/test_private_member_function_linux.cpp)
+  * [x] [类的私有成员函数(cpp17)](test_cpp17/test_private_member.cpp)
 
 
 # 单元测试相关说明
 ## 不能打桩
-- 不能对 exit 函数打桩,编译器做优化了
+- 不能对 exit 函数打桩（部分系统调用）
 - 不能对纯虚函数打桩, 纯虚函数没有地址
 - 不能对 lambda 函数打桩, lambda 函数获取不到地址(但可以尝试使用 addr_any.h 接口获取地址)
 - 不能对静态函数打桩, 静态函数地址不可见.(但可以尝试使用 addr_any.h 接口获取地址)
