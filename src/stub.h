@@ -47,9 +47,16 @@
     #define CODESIZE_MAX CODESIZE
     // ldr pc, [pc, #-4]
     #define REPLACE_FAR(t, fn, fn_stub)\
-        ((uint32_t*)fn)[0] = 0xe51ff004;\
-        ((uint32_t*)fn)[1] = (uint32_t)fn_stub;\
-        CACHEFLUSH((char *)fn, CODESIZE);
+        if ((uintptr_t)fn & 0x00000001) { \
+          *(uint16_t *)&f[0] = 0xf8df;\
+          *(uint16_t *)&f[2] = 0xf000;\
+          *(uint16_t *)&f[4] = (uint16_t)(fn_stub & 0xffff);\
+          *(uint16_t *)&f[6] = (uint16_t)(fn_stub >> 16);\
+        } else { \
+          ((uint32_t*)fn)[0] = 0xe51ff004;\
+          ((uint32_t*)fn)[1] = (uint32_t)fn_stub;\
+        }
+        CACHEFLUSH((char *)((uintptr_t)fn & 0xfffffffe), CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__thumb__) || defined(_M_THUMB)
     #define CODESIZE 12
