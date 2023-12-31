@@ -273,7 +273,7 @@ public:
                     std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
                 }
 
-                CACHEFLUSH(pstub->fn, CODESIZE);
+                CACHEFLUSH((char *)pstub->fn, CODESIZE);
 
 #ifdef _WIN32
                 VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect);
@@ -377,7 +377,7 @@ public:
             std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
         }
 
-        CACHEFLUSH(pstub->fn, CODESIZE);
+        CACHEFLUSH((char *)pstub->fn, CODESIZE);
 
 
 #ifdef _WIN32
