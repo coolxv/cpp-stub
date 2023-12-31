@@ -1,0 +1,63 @@
+# Source: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
+name: Tests on multiple platforms
+
+on:
+  push:
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+          - os: windows-latest
+            compiler: ""
+          - os: ubuntu-latest
+            compiler: gcc
+          - os: ubuntu-latest
+            compiler: clang
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: ilammy/msvc-dev-cmd@v1
+      if: ${{ matrix.os == 'windows-latest' }}
+
+    - name: Build and run tests (Windows)
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: |
+        nmake -f Makefile.win64
+        
+        Get-ChildItem "." -Filter '*.exe' | 
+        Foreach-Object {
+          Write-Output "--- RUNNING $_ ---"
+            Invoke-Expression $_
+          Write-Output "--- done RUNNING $_ ---"
+        }
+
+      working-directory: ${{ github.workspace }}/test
+      shell: pwsh
+
+    - name: Build and run tests (Ubuntu)
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: |
+        make -f Makefile.linux64.${{ matrix.compiler }}
+        
+        for f in $(find . -type f -name "*.cpp"); do
+          if [[ -z "${f##*win.cpp}" ]]; then
+            continue
+          fi
+        
+          f=${f%.cpp}
+          echo "--- RUNNING $f ---"
+            ${f}
+          echo "--- done RUNNING $f ---"
+        done
+      working-directory: ${{ github.workspace }}/test
+      shell: bash
