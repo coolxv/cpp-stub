@@ -222,7 +222,7 @@
 
 struct func_stub
 {
-    char *fn;
+    unsigned char *fn;
     unsigned char code_buf[CODESIZE];
     bool far_jmp;
 };
@@ -251,7 +251,7 @@ public:
     }
     void clear()
     {
-        std::map<char*,func_stub*>::iterator iter;
+        std::map<unsigned char*,func_stub*>::iterator iter;
         struct func_stub *pstub;
         for(iter=m_result.begin(); iter != m_result.end(); iter++)
         {
@@ -291,8 +291,8 @@ public:
     template<typename T,typename S>
     void set(T addr, S addr_stub)
     {
-        char * fn;
-        char * fn_stub;
+        unsigned char * fn;
+        unsigned char * fn_stub;
         fn = addrof(addr);
         fn_stub = addrof(addr_stub);
         struct func_stub *pstub;
@@ -339,17 +339,17 @@ public:
         {
             throw("stub set memory protect to r+x failed");
         }
-        m_result.insert(std::pair<char*,func_stub*>(fn,pstub));
+        m_result.insert(std::pair<unsigned char*,func_stub*>(fn,pstub));
         return;
     }
 
     template<typename T>
     void reset(T addr)
     {
-        char * fn;
+        unsigned char * fn;
         fn = addrof(addr);
         
-        std::map<char*,func_stub*>::iterator iter = m_result.find(fn);
+        std::map<unsigned char*,func_stub*>::iterator iter = m_result.find(fn);
         
         if (iter == m_result.end())
         {
@@ -394,7 +394,7 @@ public:
         return;
     }
 private:
-    char *pageof(char* addr)
+    char *pageof(unsigned char* addr)
     { 
 #ifdef _WIN32
         return (char *)((unsigned long long)addr & ~(m_pagesize - 1));
@@ -404,18 +404,18 @@ private:
     }
 
     template<typename T>
-    char* addrof(T addr)
+    unsigned char* addrof(T addr)
     {
         union 
         {
           T _s;
-          char* _d;
+          unsigned char* _d;
         }ut;
         ut._s = addr;
         return ut._d;
     }
 
-    bool distanceof(char* addr, char* addr_stub)
+    bool distanceof(unsigned char* addr, unsigned char* addr_stub)
     {
         std::ptrdiff_t diff = addr_stub >= addr ? addr_stub - addr : addr - addr_stub;
         if((sizeof(addr) > 4) && (((diff >> 31) - 1) > 0))
@@ -433,7 +433,7 @@ private:
     //LP64
     long m_pagesize;
 #endif   
-    std::map<char*, func_stub*> m_result;
+    std::map<unsigned char*, func_stub*> m_result;
     
 };
 
