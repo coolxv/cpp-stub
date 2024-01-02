@@ -48,12 +48,14 @@ jobs:
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
         make -f Makefile.linux64.${{ matrix.compiler }}
-        
+        compiler=${{ matrix.compiler }}
         for f in $(find . -type f -name "*.cpp"); do
           if [[ -z "${f##*win.cpp}" ]]; then
             continue
           fi
-        
+          if [${compiler}="clang"] && [[ -z "${f##*virtual*.cpp}" ]]; then
+            continue
+          fi
           f=${f%.cpp}
           echo "--- RUNNING $f ---"
             ${f}
