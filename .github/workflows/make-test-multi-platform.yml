@@ -53,10 +53,13 @@ jobs:
           if [[ -z "${f##*win.cpp}" ]]; then
             continue
           fi
-          if ${compiler}="clang" && [[ -z "${f##*virtual*.cpp}" ]]; then
+          
+          f=${f%.cpp}
+          
+          if ${compiler}="clang" && [[ $f =~ "virtual" ]]; then
             continue
           fi
-          f=${f%.cpp}
+          
           echo "--- RUNNING $f ---"
             ${f}
           echo "--- done RUNNING $f ---"
