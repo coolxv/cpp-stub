@@ -12,6 +12,7 @@
 #endif
 //c
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 //c++
 #include <map>
