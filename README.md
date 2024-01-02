@@ -1,3 +1,5 @@
+![building and running workflow](https://github.com/coolxv/cpp-stub/actions/workflows/make-test-multi-platform.yml/badge.svg)
+
 [中文](README_zh.md)|[English](README.md)
 
 # Principle
