@@ -56,7 +56,7 @@ jobs:
           
           f=${f%.cpp}
           
-          if [ ${compiler}="clang" ] && [[ $f=~"virtual" ]]; then
+          if [ ${compiler}="clang" ] && [[ $f==*virtual* ]]; then
             continue
           fi
           
