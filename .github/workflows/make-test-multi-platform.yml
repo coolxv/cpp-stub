@@ -53,7 +53,7 @@ jobs:
           if [[ -z "${f##*win.cpp}" ]]; then
             continue
           fi
-          if [${compiler}="clang"] && [[ -z "${f##*virtual*.cpp}" ]]; then
+          if ${compiler}="clang" && [[ -z "${f##*virtual*.cpp}" ]]; then
             continue
           fi
           f=${f%.cpp}
