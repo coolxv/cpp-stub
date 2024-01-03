@@ -1,7 +1,7 @@
 #sudo apt-get install clang
 #sudo update-alternatives --config clang
 SOURCE = $(filter-out %win.cpp, $(wildcard *.cpp))
-SOURCE := $(filter-out test_virtual_function_linux.cpp, $(SOURCE))
+SOURCE := $(filter-out test_virtual_function_linux.cpp test_virtual_overload_function_linux.cpp, $(SOURCE))
 TARGETS = $(patsubst %.cpp, %, $(SOURCE))
 INC=-I../src -I../src_linux
 LIB=-lm

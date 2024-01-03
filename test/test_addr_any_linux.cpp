@@ -47,22 +47,24 @@ int main(int argc, char **argv)
     }
     //Get dynamic library static function address
     {
-        AddrAny any("libc-2.27.so");// cat /proc/pid/maps
-        
+        //AddrAny any("libc-2.27.so");// cat /proc/pid/maps
+        AddrAny any("libc.so.6");// cat /proc/pid/maps     
         std::map<std::string,void*> result;
 #ifdef __clang__ 
         any.get_global_func_addr_dynsym("^printf$", result);
 #else
         any.get_weak_func_addr_dynsym("^puts", result);
 #endif
-        
-        foo();
-        Stub stub;
-        std::map<std::string,void*>::iterator it;
-        for (it=result.begin(); it!=result.end(); ++it)
         {
-            stub.set(it->second ,printf_stub);
-            std::cout << it->first << " => " << it->second << std::endl;
+            foo();
+            Stub stub;
+            std::map<std::string,void*>::iterator it;
+            for (it=result.begin(); it!=result.end(); ++it)
+            {
+                stub.set(it->second ,printf_stub);
+                std::cout << it->first << " => " << it->second << std::endl;
+            }
+            foo();
         }
         foo();
     }
