@@ -50,8 +50,7 @@
         ((uint32_t*)fn)[0] = 0x58000040 | 9;\
         ((uint32_t*)fn)[1] = 0xd61f0120 | (9 << 5);\
         *(long long *)(fn + 8) = (long long )fn_stub;\
-        CACHEFLUSH((char *)fn, CODESIZE);\
-        VALGRIND_CACHE_FLUSH(fn, CODESIZE)
+        CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__arm__) || defined(_M_ARM)
     #define CODESIZE 8U
@@ -67,7 +66,7 @@
         } else { \
           ((uint32_t*)fn)[0] = 0xe51ff004;\
           ((uint32_t*)fn)[1] = (uint32_t)fn_stub;\
-        }
+        }\
         CACHEFLUSH((char *)((uintptr_t)fn & 0xfffffffe), CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__thumb__) || defined(_M_THUMB)
@@ -87,7 +86,6 @@
         *(uint16_t *)&f[6] = (uint16_t)(fn_stub & 0xffff);\
         *(uint16_t *)&f[8] = (uint16_t)(fn_stub >> 16);\
         CACHEFLUSH((char *)f, CODESIZE);
-
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__mips64)
     #define CODESIZE 80U
@@ -106,7 +104,6 @@
     //120000d38:  dfbc0008    ld  gp, 8(sp)
     //120000d3c:  67bd0020    daddiu  sp, sp, 32
     //120000d40:  03e00008    jr  ra
-
     #define REPLACE_FAR(t, fn, fn_stub)\
         ((uint32_t *)fn)[0] = 0x67bdffe0;\
         ((uint32_t *)fn)[1] = 0xffbf0018;\
@@ -134,10 +131,8 @@
         ((uint32_t *)fn)[17] = 0x67bd0020;\
         ((uint32_t *)fn)[18] = 0x03e00008;\
         ((uint32_t *)fn)[19] = 0x00000000;\
-        CACHEFLUSH((char *)fn, CODESIZE);\
-        VALGRIND_CACHE_FLUSH(fn, CODESIZE)
+        CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
-
 #elif defined(__riscv) && __riscv_xlen == 64
     #define CODESIZE 24U
     #define CODESIZE_MIN 24U
@@ -182,7 +177,6 @@
         *(unsigned int*)(fn + 16) = (unsigned int)fn_stub;\
         CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
-
 #elif defined(__loongarch64) 
     #define CODESIZE 20U
     #define CODESIZE_MIN 20U
@@ -210,7 +204,6 @@
         *(unsigned long long*)(fn + 12) = (unsigned long long)fn_stub;\
         CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
-
 #else //__i386__ _x86_64__  _M_IX86 _M_X64
     #define CODESIZE 13U
     #define CODESIZE_MIN 5U
@@ -226,7 +219,6 @@
         *(fn + 11) = 0xff;\
         *(fn + 12) = 0xe3;\
         CACHEFLUSH((char *)fn, CODESIZE);
-
     //5 byte(jmp rel32)
     #define REPLACE_NEAR(t, fn, fn_stub)\
         *fn = 0xE9;\
@@ -281,14 +273,10 @@ public:
                 if(pstub->far_jmp)
                 {
                     std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
-                    //discard valgrind translation cache.
-                    VALGRIND_CACHE_FLUSH(pstub->fn, CODESIZE_MAX);
                 }
                 else
                 {
                     std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
-                    //discard valgrind translation cache.
-                    VALGRIND_CACHE_FLUSH(pstub->fn, CODESIZE_MIN);
                 }
 
                 CACHEFLUSH((char *)pstub->fn, CODESIZE);
@@ -389,14 +377,10 @@ public:
         if(pstub->far_jmp)
         {
             std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
-            //discard valgrind translation cache.
-            VALGRIND_CACHE_FLUSH(pstub->fn, CODESIZE_MAX);
         }
         else
         {
             std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
-            //discard valgrind translation cache.
-            VALGRIND_CACHE_FLUSH(pstub->fn, CODESIZE_MIN);
         }
 
         CACHEFLUSH((char *)pstub->fn, CODESIZE);
@@ -416,12 +400,12 @@ public:
         return;
     }
 private:
-    char *pageof(unsigned char* addr)
+    void *pageof(unsigned char* addr)
     { 
 #ifdef _WIN32
-        return (char *)((unsigned long long)addr & ~(m_pagesize - 1));
+        return (void *)((unsigned long long)addr & ~(m_pagesize - 1));
 #else
-        return (char *)((unsigned long)addr & ~(m_pagesize - 1));
+        return (void *)((unsigned long)addr & ~(m_pagesize - 1));
 #endif   
     }
 
@@ -458,6 +442,5 @@ private:
     std::map<unsigned char*, func_stub*> m_result;
     
 };
-
 
 #endif
