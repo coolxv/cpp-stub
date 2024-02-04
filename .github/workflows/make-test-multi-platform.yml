@@ -33,6 +33,7 @@ jobs:
     - name: Build and run tests (Windows X64)
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
+        wmic cpu
         nmake -f Makefile.win64
         
         Get-ChildItem "." -Filter '*.exe' | 
@@ -70,7 +71,7 @@ jobs:
     - name: Build and run tests (Macos Arm64)
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
-        lscpu
+        sysctl hw
         make -f Makefile.linux64.clang
         compiler=clang
         for f in $(find . -type f -name "*.cpp"); do
