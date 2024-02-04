@@ -30,7 +30,7 @@ jobs:
     - uses: ilammy/msvc-dev-cmd@v1
       if: ${{ matrix.os == 'windows-latest' }}
 
-    - name: Build and run tests (Windows X64)
+    - name: Build and run tests (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
         wmic cpu
@@ -46,7 +46,7 @@ jobs:
       working-directory: ${{ github.workspace }}/test
       shell: pwsh
 
-    - name: Build and run tests (Ubuntu X64)
+    - name: Build and run tests (Ubuntu)
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
         lscpu
@@ -68,7 +68,7 @@ jobs:
           echo "--- done RUNNING $f ---"
         done
       working-directory: ${{ github.workspace }}/test
-    - name: Build and run tests (Macos Arm64)
+    - name: Build and run tests (Macos)
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
         sysctl hw
