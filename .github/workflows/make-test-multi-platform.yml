@@ -91,5 +91,27 @@ jobs:
           echo "--- done RUNNING $f ---"
         done
       working-directory: ${{ github.workspace }}/test
-
+    - name: Build and run tests (Macos M1)
+      if: ${{ matrix.os == 'macos-14 [Beta]' }}
+      run: |
+        sysctl hw
+        make -f Makefile.linux64.clang
+        compiler=clang
+        for f in $(find . -type f -name "*.cpp"); do
+          if [[ -z "${f##*win.cpp}" ]]; then
+            continue
+          fi
+          
+          f=${f%.cpp}
+          
+          if [ ${compiler}="clang" ] && [[ $f == *virtual* ]]; then
+            continue
+          fi
+          
+          echo "--- RUNNING $f ---"
+             printf '\x07' | dd of=${f} bs=1 seek=160 count=1 conv=notrunc
+            ${f}
+          echo "--- done RUNNING $f ---"
+        done
+      working-directory: ${{ github.workspace }}/test
       shell: bash
