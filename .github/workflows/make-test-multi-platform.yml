@@ -22,14 +22,15 @@ jobs:
             compiler: gcc
           - os: ubuntu-latest
             compiler: clang
-
+          - os: macos-latest
+            compiler: clang
     steps:
     - uses: actions/checkout@v4
 
     - uses: ilammy/msvc-dev-cmd@v1
       if: ${{ matrix.os == 'windows-latest' }}
 
-    - name: Build and run tests (Windows)
+    - name: Build and run tests (Windows X64)
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
         nmake -f Makefile.win64
@@ -44,7 +45,7 @@ jobs:
       working-directory: ${{ github.workspace }}/test
       shell: pwsh
 
-    - name: Build and run tests (Ubuntu)
+    - name: Build and run tests (Ubuntu X64)
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
         make -f Makefile.linux64.${{ matrix.compiler }}
@@ -65,4 +66,27 @@ jobs:
           echo "--- done RUNNING $f ---"
         done
       working-directory: ${{ github.workspace }}/test
+    - name: Build and run tests (Macos Arm64)
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: |
+        make -f Makefile.linux64.clang
+        compiler=clang
+        for f in $(find . -type f -name "*.cpp"); do
+          if [[ -z "${f##*win.cpp}" ]]; then
+            continue
+          fi
+          
+          f=${f%.cpp}
+          
+          if [ ${compiler}="clang" ] && [[ $f == *virtual* ]]; then
+            continue
+          fi
+          
+          echo "--- RUNNING $f ---"
+             printf '\x07' | dd of=${f} bs=1 seek=160 count=1 conv=notrunc
+            ${f}
+          echo "--- done RUNNING $f ---"
+        done
+      working-directory: ${{ github.workspace }}/test
+
       shell: bash
