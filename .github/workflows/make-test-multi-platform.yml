@@ -48,6 +48,7 @@ jobs:
     - name: Build and run tests (Ubuntu X64)
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
+        lscpu
         make -f Makefile.linux64.${{ matrix.compiler }}
         compiler=${{ matrix.compiler }}
         for f in $(find . -type f -name "*.cpp"); do
@@ -69,6 +70,7 @@ jobs:
     - name: Build and run tests (Macos Arm64)
       if: ${{ matrix.os == 'macos-latest' }}
       run: |
+        lscpu
         make -f Makefile.linux64.clang
         compiler=clang
         for f in $(find . -type f -name "*.cpp"); do
