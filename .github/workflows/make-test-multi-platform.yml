@@ -24,6 +24,8 @@ jobs:
             compiler: clang
           - os: macos-latest
             compiler: clang
+          - os: macos-14 [Beta]
+            compiler: clang            
     steps:
     - uses: actions/checkout@v4
 
