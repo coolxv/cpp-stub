@@ -24,7 +24,7 @@ jobs:
             compiler: clang
           - os: macos-latest
             compiler: clang
-          - os: macos-14 [Beta]
+          - os: macos-14
             compiler: clang            
     steps:
     - uses: actions/checkout@v4
@@ -94,7 +94,7 @@ jobs:
         done
       working-directory: ${{ github.workspace }}/test
     - name: Build and run tests (Macos M1)
-      if: ${{ matrix.os == 'macos-14 [Beta]' }}
+      if: ${{ matrix.os == 'macos-14' }}
       run: |
         sysctl hw
         make -f Makefile.linux64.clang
