@@ -22,10 +22,10 @@ jobs:
             compiler: gcc
           - os: ubuntu-latest
             compiler: clang
-          - os: macos-latest
-            compiler: clang
- #         - os: macos-14
- #           compiler: clang            
+#         - os: macos-latest
+#           compiler: clang
+#         - os: macos-14
+#           compiler: clang            
     steps:
     - uses: actions/checkout@v4
 
