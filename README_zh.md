@@ -21,10 +21,10 @@
   * [x] riscv64
   * [x] loongarch64
   * [x] mips64
-  * [ ] ppc64
-  * [ ] alpha 
-  * [ ] sparc
-  * [ ] sw_64 
+  * [x] ppc64 (由chatgpt 生成，需要验证)
+  * [x] alpha (由chatgpt 生成，需要验证)
+  * [x] sparc (由chatgpt 生成，需要验证)
+  * [x] sw_64 (由chatgpt 生成，需要验证n)
 
 - 支持的编译器 : 
   * [x] msvc

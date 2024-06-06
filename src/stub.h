@@ -204,6 +204,66 @@
         *(unsigned long long*)(fn + 12) = (unsigned long long)fn_stub;\
         CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
+#elif defined(__powerpc64__)
+    #define CODESIZE 20U
+    #define CODESIZE_MIN 20U
+    #define CODESIZE_MAX CODESIZE
+    // lis r12, fn_stub@highest
+    // ori r12, r12, fn_stub@higher
+    // rldicr r12, r12, 32, 31
+    // ori r12, r12, fn_stub@high
+    // ori r12, r12, fn_stub@l
+    // mtctr r12
+    // bctr
+    #define REPLACE_FAR(t, fn, fn_stub)\
+        ((uint32_t*)fn)[0] = 0x3c000000 | (((uintptr_t)fn_stub >> 48) & 0xffff);\
+        ((uint32_t*)fn)[1] = 0x60000000 | (((uintptr_t)fn_stub >> 32) & 0xffff);\
+        ((uint32_t*)fn)[2] = 0x78000000 | ((((uintptr_t)fn_stub >> 32) & 0xffff) << 16);\
+        ((uint32_t*)fn)[3] = 0x60000000 | (((uintptr_t)fn_stub >> 16) & 0xffff);\
+        ((uint32_t*)fn)[4] = 0x60000000 | ((uintptr_t)fn_stub & 0xffff);\
+        ((uint32_t*)fn)[5] = 0x7d8903a6;\
+        ((uint32_t*)fn)[6] = 0x4e800420;\
+        CACHEFLUSH((char *)fn, CODESIZE);
+    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
+#elif defined(__alpha__)
+    #define CODESIZE 16U
+    #define CODESIZE_MIN 16U
+    #define CODESIZE_MAX CODESIZE
+    // ldah t12, high(fn_stub)
+    // lda t12, low(fn_stub)(t12)
+    // jmp zero, (t12), 0
+    #define REPLACE_FAR(t, fn, fn_stub)\
+        ((uint32_t*)fn)[0] = 0x279f0000 | (((uintptr_t)fn_stub >> 32) & 0xffff);\
+        ((uint32_t*)fn)[1] = 0x201f0000 | ((uintptr_t)fn_stub & 0xffff);\
+        ((uint32_t*)fn)[2] = 0x6bfb0000;\
+        CACHEFLUSH((char *)fn, CODESIZE);
+    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
+#elif defined(__sparc__) && defined(__arch64__)
+    #define CODESIZE 24U
+    #define CODESIZE_MIN 24U
+    #define CODESIZE_MAX CODESIZE
+    // sethi %hi(fn_stub), %g1
+    // jmp %g1 + %lo(fn_stub)
+    // nop
+    #define REPLACE_FAR(t, fn, fn_stub)\
+        ((uint32_t*)fn)[0] = 0x03000000 | (((uintptr_t)fn_stub >> 42) & 0x3fffff);\
+        ((uint32_t*)fn)[1] = 0x81c06000 | (((uintptr_t)fn_stub >> 32) & 0x3ff);\
+        ((uint32_t*)fn)[2] = 0x01000000;\
+        CACHEFLUSH((char *)fn, CODESIZE);
+    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
+#elif defined(__sw_64__)
+    #define CODESIZE 12U
+    #define CODESIZE_MIN 12U
+    #define CODESIZE_MAX CODESIZE
+    // bis zero, zero, v0
+    // ldq v0, fn_stub
+    // jmp zero, (v0)
+    #define REPLACE_FAR(t, fn, fn_stub)\
+        ((uint32_t*)fn)[0] = 0x20000000;\
+        ((uint32_t*)fn)[1] = 0xd2000000 | ((uintptr_t)fn_stub & 0xffffffff);\
+        ((uint32_t*)fn)[2] = 0x6bfb0000;\
+        CACHEFLUSH((char *)fn, CODESIZE);
+    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #else //__i386__ _x86_64__  _M_IX86 _M_X64
     #define CODESIZE 13U
     #define CODESIZE_MIN 5U
