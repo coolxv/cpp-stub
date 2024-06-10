@@ -22,6 +22,7 @@
   * [x] loongarch64
   * [x] mips64
   * [x] ppc64 (由chatgpt 生成，需要验证)
+  * [x] s390x (由chatgpt 生成，需要验证)
   * [x] alpha (由chatgpt 生成，需要验证)
   * [x] sparc (由chatgpt 生成，需要验证)
   * [x] sw_64 (由chatgpt 生成，需要验证n)

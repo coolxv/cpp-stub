@@ -264,6 +264,18 @@
         ((uint32_t*)fn)[2] = 0x6bfb0000;\
         CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
+#elif defined(__s390x__)
+    #define CODESIZE 16U
+    #define CODESIZE_MIN 16U
+    #define CODESIZE_MAX CODESIZE
+    // lgrl %r1, fn_stub
+    // br %r1
+    #define REPLACE_FAR(t, fn, fn_stub)\
+            ((uint32_t*)fn)[0] = 0xc0200000 | (1 << 20) | (0x0);\
+            ((uint32_t*)fn)[1] = 0x07f10000;\
+            *(uint64_t *)(fn + 8) = (uint64_t)fn_stub;\
+            CACHEFLUSH((char *)fn, CODESIZE);
+    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #else //__i386__ _x86_64__  _M_IX86 _M_X64
     #define CODESIZE 13U
     #define CODESIZE_MIN 5U
