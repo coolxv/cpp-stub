@@ -239,17 +239,42 @@
         CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__sparc__) && defined(__arch64__)
-    #define CODESIZE 24U
-    #define CODESIZE_MIN 24U
+    #define CODESIZE 28U // 7 instructions * 4 bytes
+    #define CODESIZE_MIN 28U
     #define CODESIZE_MAX CODESIZE
-    // sethi %hi(fn_stub), %g1
-    // jmp %g1 + %lo(fn_stub)
-    // nop
+    /*
+     * Correct 64-bit absolute jump for SPARCv9.
+     * This sequence loads the full 64-bit address of fn_stub into register %g1
+     * and then jumps to it.
+     *
+     * Assembly:
+     * 1. sethi   %hix(fn_stub), %g1      // bits 63-42
+     * 2. or      %g1, %lox(fn_stub), %g1 // bits 41-32
+     * 3. sllx    %g1, 32, %g1            // shift left by 32
+     * 4. sethi   %hi(fn_stub), %g1       // bits 31-10 (of the lower 32 bits)
+     * 5. or      %g1, %lo(fn_stub), %g1  // bits 9-0
+     * 6. jmpl    %g1, %g0                // jump to address in %g1
+     * 7. nop                          // delay slot filler
+     */
     #define REPLACE_FAR(t, fn, fn_stub)\
-        ((uint32_t*)fn)[0] = 0x03000000 | (((uintptr_t)fn_stub >> 42) & 0x3fffff);\
-        ((uint32_t*)fn)[1] = 0x81c06000 | (((uintptr_t)fn_stub >> 32) & 0x3ff);\
-        ((uint32_t*)fn)[2] = 0x01000000;\
-        CACHEFLUSH((char *)fn, CODESIZE);
+        do {\
+            uint64_t addr = (uint64_t)fn_stub;\
+            /* 1. sethi %hix(addr), %g1 */\
+            ((uint32_t*)fn)[0] = 0x03000000 | ((addr >> 42) & 0x3fffff);\
+            /* 2. or %g1, %lox(addr), %g1 */\
+            ((uint32_t*)fn)[1] = 0x82104000 | ((addr >> 32) & 0x3ff);\
+            /* 3. sllx %g1, 32, %g1 */\
+            ((uint32_t*)fn)[2] = 0x83285020;\
+            /* 4. sethi %hi(addr), %g1 */\
+            ((uint32_t*)fn)[3] = 0x03000000 | ((addr >> 10) & 0x3fffff);\
+            /* 5. or %g1, %lo(addr), %g1 */\
+            ((uint32_t*)fn)[4] = 0x82104000 | (addr & 0x3ff);\
+            /* 6. jmpl %g1, %g0 */\
+            ((uint32_t*)fn)[5] = 0x81c04000;\
+            /* 7. nop */\
+            ((uint32_t*)fn)[6] = 0x01000000;\
+            CACHEFLUSH((char *)fn, CODESIZE);\
+        } while(0)
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__sw_64__)
     #define CODESIZE 12U
@@ -271,7 +296,7 @@
     // lgrl %r1, fn_stub
     // br %r1
     #define REPLACE_FAR(t, fn, fn_stub)\
-            ((uint32_t*)fn)[0] = 0xc0200000 | (1 << 20) | (0x0);\
+            ((uint32_t*)fn)[0] = 0xc0100000 | (1 << 20) | (0x0);\
             ((uint32_t*)fn)[1] = 0x07f10000;\
             *(uint64_t *)(fn + 8) = (uint64_t)fn_stub;\
             CACHEFLUSH((char *)fn, CODESIZE);
