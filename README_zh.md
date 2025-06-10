@@ -49,6 +49,7 @@
   * [x] [仿函数](test/test_functor_linux.cpp)
   * [x] [类的私有成员函数(使用 addr_pri.h)](test/test_private_member_function_linux.cpp)
   * [x] [类的私有成员函数(cpp17)](test_cpp17/test_private_member.cpp)
+  * [x] 动态库里的函数(使用 dlsym()获取)
 
 
 # 单元测试相关说明

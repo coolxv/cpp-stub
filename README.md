@@ -47,7 +47,7 @@
   * [x] [functor](test/test_functor_linux.cpp)
   * [x] [private member function(use addr_pri.h)](test/test_private_member_function_linux.cpp)
   * [x] [private member function(cpp17)](test_cpp17/test_private_member.cpp)
-
+  * [x] function in the dynamic library(use dlsym())
 
 
 
