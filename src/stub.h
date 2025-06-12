@@ -205,8 +205,8 @@
         CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__powerpc64__)
-    #define CODESIZE 20U
-    #define CODESIZE_MIN 20U
+    #define CODESIZE 28U
+    #define CODESIZE_MIN 28U
     #define CODESIZE_MAX CODESIZE
     // lis r12, fn_stub@highest
     // ori r12, r12, fn_stub@higher
