@@ -206,6 +206,7 @@
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__powerpc64__) && __LITTLE_ENDIAN__
     // For ppc64le (ELFv2 ABI with function descriptors)
+    // https://llvm.org/devmtg/2014-04/PDFs/Talks/Euro-LLVM-2014-Weigand.pdf
     #define CODESIZE 36U
     #define CODESIZE_MIN 36U
     #define CODESIZE_MAX CODESIZE
@@ -237,7 +238,8 @@
             /* Load 64-bit descriptor address into r11 */ \
             p[0] = 0x3d600000 | (uint32_t)(desc_addr >> 48);\
             p[1] = 0x616b0000 | (uint32_t)((desc_addr >> 32) & 0xFFFF);\
-            p[2] = 0x796b07c6 | (uint32_t)(32 << 21) | (31 << 16);\
+            /* rldicr r11, r11, 32, 31 (Rotate Left Doubleword Immediate then Clear Right) */ \
+            p[2] = 0x796b07c6; \
             p[3] = 0x616b0000 | (uint32_t)((desc_addr >> 16) & 0xFFFF);\
             p[4] = 0x616b0000 | (uint32_t)(desc_addr & 0xFFFF);\
             /* ld r12, 0(r11) */ \
@@ -251,8 +253,8 @@
             CACHEFLUSH((char *)fn, CODESIZE);\
         } while(0)
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
-
 #elif defined(__powerpc64__)
+    // For ppc64be (Big Endian, ELFv1 ABI)
     #define CODESIZE 28U
     #define CODESIZE_MIN 28U
     #define CODESIZE_MAX CODESIZE
