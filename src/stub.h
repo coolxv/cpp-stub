@@ -438,7 +438,7 @@ public:
             iter->second  = NULL;
             delete pstub;        
         }
-        
+        m_result.clear();
         return;
     }
     template<typename T,typename S>
