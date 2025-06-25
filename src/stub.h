@@ -205,75 +205,47 @@
         CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__powerpc64__) && __LITTLE_ENDIAN__
-    // For ppc64le (ELFv2 ABI with function descriptors)
+    // For ppc64le (Little Endian, ELFv2 ABI)
+    // https://maskray.me/blog/2023-02-26-linker-notes-on-power-isa
     // https://llvm.org/devmtg/2014-04/PDFs/Talks/Euro-LLVM-2014-Weigand.pdf
-    #define CODESIZE 36U
-    #define CODESIZE_MIN 36U
-    #define CODESIZE_MAX CODESIZE
-    /*
-     * This hook loads the address of the stub function's descriptor,
-     * then loads the code entry point and TOC address from the descriptor,
-     * and finally performs an indirect branch.
-     *
-     * Assembly equivalence:
-     * // Step 1: Load the 64-bit address of the function descriptor for `fn_stub` into r11
-     * lis   r11, fn_stub_desc@highest
-     * ori   r11, r11, fn_stub_desc@higher
-     * rldicr r11, r11, 32, 31
-     * ori   r11, r11, fn_stub_desc@h
-     * ori   r11, r11, fn_stub_desc@l
-     *
-     * // Step 2: Load values from the function descriptor
-     * ld    r12, 0(r11)   // Load code address into r12 from descriptor
-     * ld    r2, 8(r11)    // Load TOC address into r2 from descriptor
-     *
-     * // Step 3: Branch
-     * mtctr r12           // Move code address to Count Register
-     * bctr                // Branch to the address in CTR
-    */
-    #define REPLACE_FAR(t, fn, fn_stub)\
-        do {\
-            uint64_t desc_addr = (uint64_t)fn_stub;\
-            uint32_t* p = (uint32_t*)fn;\
-            /* Load 64-bit descriptor address into r11 */ \
-            p[0] = 0x3d600000 | (uint32_t)(desc_addr >> 48);\
-            p[1] = 0x616b0000 | (uint32_t)((desc_addr >> 32) & 0xFFFF);\
-            /* rldicr r11, r11, 32, 31 (Rotate Left Doubleword Immediate then Clear Right) */ \
-            p[2] = 0x796b07c6; \
-            p[3] = 0x616b0000 | (uint32_t)((desc_addr >> 16) & 0xFFFF);\
-            p[4] = 0x616b0000 | (uint32_t)(desc_addr & 0xFFFF);\
-            /* ld r12, 0(r11) */ \
-            p[5] = 0xe98b0000;\
-            /* ld r2, 8(r11) */ \
-            p[6] = 0xe84b0008;\
-            /* mtctr r12 */ \
-            p[7] = 0x7d8903a6;\
-            /* bctr */ \
-            p[8] = 0x4e800420;\
-            CACHEFLUSH((char *)fn, CODESIZE);\
-        } while(0)
-    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
-#elif defined(__powerpc64__)
-    // For ppc64be (Big Endian, ELFv1 ABI)
+    // PowerPC64 LE (ELFv2 ABI) - Direct jump, no TOC descriptor needed
     #define CODESIZE 28U
     #define CODESIZE_MIN 28U
     #define CODESIZE_MAX CODESIZE
-    // lis r12, fn_stub@highest
-    // ori r12, r12, fn_stub@higher
-    // rldicr r12, r12, 32, 31
-    // ori r12, r12, fn_stub@high
-    // ori r12, r12, fn_stub@l
-    // mtctr r12
-    // bctr
-    #define REPLACE_FAR(t, fn, fn_stub)\
-        ((uint32_t*)fn)[0] = 0x3c000000 | (((uintptr_t)fn_stub >> 48) & 0xffff);\
-        ((uint32_t*)fn)[1] = 0x60000000 | (((uintptr_t)fn_stub >> 32) & 0xffff);\
-        ((uint32_t*)fn)[2] = 0x78000000 | ((((uintptr_t)fn_stub >> 32) & 0xffff) << 16);\
-        ((uint32_t*)fn)[3] = 0x60000000 | (((uintptr_t)fn_stub >> 16) & 0xffff);\
-        ((uint32_t*)fn)[4] = 0x60000000 | ((uintptr_t)fn_stub & 0xffff);\
-        ((uint32_t*)fn)[5] = 0x7d8903a6;\
-        ((uint32_t*)fn)[6] = 0x4e800420;\
-        CACHEFLUSH((char *)fn, CODESIZE);
+    #define REPLACE_FAR(t, fn, fn_stub)                         \
+        do {                                                    \
+            uint64_t addr = (uint64_t)(fn_stub);                \
+            uint32_t* p = (uint32_t*)(fn);                      \
+            p[0] = 0x3d800000 | ((addr >> 48) & 0xFFFF);        /* lis r12, hi16 */ \
+            p[1] = 0x618c0000 | ((addr >> 32) & 0xFFFF);        /* ori r12, mid16 */ \
+            p[2] = 0x798c07c6;                                  /* rldicr r12, r12, 32, 31 */ \
+            p[3] = 0x658c0000 | ((addr >> 16) & 0xFFFF);        /* oris r12, midlow16 */ \
+            p[4] = 0x618c0000 | (addr & 0xFFFF);                /* ori r12, low16 */ \
+            p[5] = 0x7d8903a6;                                  /* mtctr r12 */ \
+            p[6] = 0x4e800420;                                  /* bctr */ \
+            CACHEFLUSH((char *)fn, CODESIZE);                  \
+        } while (0)
+    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
+#elif defined(__powerpc64__)
+    // PowerPC64 BE (ELFv1 ABI) - Use function descriptor to load code + TOC
+    #define CODESIZE 36U
+    #define CODESIZE_MIN 36U
+    #define CODESIZE_MAX CODESIZE
+    #define REPLACE_FAR(t, fn, fn_stub)                         \
+        do {                                                    \
+            uint64_t desc_addr = (uint64_t)(fn_stub);           \
+            uint32_t* p = (uint32_t*)(fn);                      \
+            p[0] = 0x3d600000 | ((desc_addr >> 48) & 0xFFFF);   /* lis r11, hi16 */ \
+            p[1] = 0x616b0000 | ((desc_addr >> 32) & 0xFFFF);   /* ori r11, mid16 */ \
+            p[2] = 0x796b07c6;                                  /* rldicr r11, r11, 32, 31 */ \
+            p[3] = 0x616b0000 | ((desc_addr >> 16) & 0xFFFF);   /* ori r11, midlow16 */ \
+            p[4] = 0x616b0000 | (desc_addr & 0xFFFF);           /* ori r11, low16 */ \
+            p[5] = 0xe98b0000;                                  /* ld r12, 0(r11) - code */ \
+            p[6] = 0xe84b0008;                                  /* ld r2, 8(r11) - toc */ \
+            p[7] = 0x7d8903a6;                                  /* mtctr r12 */ \
+            p[8] = 0x4e800420;                                  /* bctr */ \
+            CACHEFLUSH((char *)fn, CODESIZE);                  \
+        } while (0)
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__alpha__)
     #define CODESIZE 16U
