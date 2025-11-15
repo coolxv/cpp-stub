@@ -39,6 +39,16 @@
 #define CACHEFLUSH(addr, size) __builtin___clear_cache(addr, addr + size);VALGRIND_CACHE_FLUSH(addr, size)
 #endif
 
+#if !defined(__BYTE_ORDER__) || !defined(__ORDER_LITTLE_ENDIAN__) || !defined(__ORDER_BIG_ENDIAN__)
+  #if defined(_WIN32)
+    #define __ORDER_LITTLE_ENDIAN__ 1234
+    #define __ORDER_BIG_ENDIAN__    4321
+    #define __BYTE_ORDER__ __ORDER_LITTLE_ENDIAN__
+  #else
+    #include <endian.h>
+  #endif
+#endif
+
 #if defined(__aarch64__) || defined(_M_ARM64)
     #define CODESIZE 16U
     #define CODESIZE_MIN 16U
@@ -76,7 +86,7 @@
     // NOP
     // LDR.W PC, [PC]
     #define REPLACE_FAR(t, fn, fn_stub)\
-        uint32_t clearBit0 = fn & 0xfffffffe;\
+        uint32_t clearBit0 = (uintptr_t)fn & 0xfffffffe;\
         char *f = (char *)clearBit0;\
         if (clearBit0 % 4 != 0) {\
             *(uint16_t *)&f[0] = 0xbe00;\
@@ -208,14 +218,15 @@
     // For ppc64le (Little Endian, ELFv2 ABI)
     // https://maskray.me/blog/2023-02-26-linker-notes-on-power-isa
     // https://llvm.org/devmtg/2014-04/PDFs/Talks/Euro-LLVM-2014-Weigand.pdf
-    // PowerPC64 LE (ELFv2 ABI) - Direct jump, no TOC descriptor needed
+    // PowerPC64 LE (ELFv2 ABI) - LEP
+    // readelf -h test_function ： Flags:  0x2, abiv2
     #define CODESIZE 28U
     #define CODESIZE_MIN 28U
     #define CODESIZE_MAX CODESIZE
     #define REPLACE_FAR(t, fn, fn_stub)                         \
         do {                                                    \
             uint64_t addr = (uint64_t)(fn_stub);                \
-            uint32_t* p = (uint32_t*)(fn);                      \
+            uint32_t* p = (uint32_t*)(fn + 8);                    \
             p[0] = 0x3d800000 | ((addr >> 48) & 0xFFFF);        /* lis r12, hi16 */ \
             p[1] = 0x618c0000 | ((addr >> 32) & 0xFFFF);        /* ori r12, mid16 */ \
             p[2] = 0x798c07c6;                                  /* rldicr r12, r12, 32, 31 */ \
@@ -227,7 +238,7 @@
         } while (0)
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__powerpc64__)
-    // PowerPC64 BE (ELFv1 ABI) - Use function descriptor to load code + TOC
+    // PowerPC64 BE (ELFv1 ABI) - Use function descriptor to load code + TOC(Table of Contents)
     #define CODESIZE 36U
     #define CODESIZE_MIN 36U
     #define CODESIZE_MAX CODESIZE
