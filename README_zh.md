@@ -9,7 +9,11 @@
 - 支持的操作系统 :
   * [x] Windows
   * [x] Linux
-  * [x] MacOS(x86-64, printf '\x07' | dd of=test_function bs=1 seek=160 count=1 conv=notrunc)
+  * [x] MacOS —— 同时支持 Intel (x86-64) 与 Apple Silicon (arm64)。编译完成后，
+    对每个可执行文件执行 `tool/macos_enable_stub.sh <binary>`，把 `__TEXT`
+    段的 `maxprot` 抬到 `rwx` 并做 ad-hoc 重新签名（macOS 的 W^X 强制保护
+    要求此步骤；参考 [issue #49](https://github.com/coolxv/cpp-stub/issues/49)
+    以及 [test/Makefile.darwin.clang](test/Makefile.darwin.clang) 里的示例）。
 
 - 支持的硬件平台 :
   * [x] x86

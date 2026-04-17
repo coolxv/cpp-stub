@@ -10,7 +10,11 @@
 - Supported operating systems:
   * [x] Windows
   * [x] Linux
-  * [x] MacOS(x86-64, printf '\x07' | dd of=test_function bs=1 seek=160 count=1 conv=notrunc)
+  * [x] MacOS — both Intel (x86-64) and Apple Silicon (arm64). After building, run
+    `tool/macos_enable_stub.sh <binary>` on each test executable to lift the
+    `__TEXT` segment's `maxprot` to `rwx` and ad-hoc re-sign (required by
+    macOS's W^X enforcement; see [issue #49](https://github.com/coolxv/cpp-stub/issues/49)
+    and [test/Makefile.darwin.clang](test/Makefile.darwin.clang) for an example).
 - Supported hardware platform: 
   * [x] x86
   * [x] x86-64
