@@ -87,3 +87,15 @@ jobs:
         done
       working-directory: ${{ github.workspace }}/test
       shell: bash
+
+    - name: CMake integration smoke test (macOS)
+      if: ${{ startsWith(matrix.os, 'macos') }}
+      run: |
+        # Verifies that downstream projects only need
+        #   target_link_libraries(my_test PRIVATE cpp-stub)
+        # and no manual post-build step — the root CMakeLists.txt
+        # defers and attaches macos_enable_stub.sh automatically.
+        cmake -S example/cmake_smoke -B example/cmake_smoke/build
+        cmake --build example/cmake_smoke/build
+        ./example/cmake_smoke/build/cmake_smoke
+      shell: bash

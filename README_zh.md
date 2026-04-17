@@ -9,11 +9,12 @@
 - 支持的操作系统 :
   * [x] Windows
   * [x] Linux
-  * [x] MacOS —— 同时支持 Intel (x86-64) 与 Apple Silicon (arm64)。编译完成后，
-    对每个可执行文件执行 `tool/macos_enable_stub.sh <binary>`，把 `__TEXT`
-    段的 `maxprot` 抬到 `rwx` 并做 ad-hoc 重新签名（macOS 的 W^X 强制保护
-    要求此步骤；参考 [issue #49](https://github.com/coolxv/cpp-stub/issues/49)
-    以及 [test/Makefile.darwin.clang](test/Makefile.darwin.clang) 里的示例）。
+  * [x] MacOS —— 同时支持 Intel (x86-64) 与 Apple Silicon (arm64)。由于 macOS
+    对 `__TEXT` 段施加 W^X 限制，并且 `mprotect` 不能超过段的 `maxprot`，
+    使用 cpp-stub 的每个可执行文件都需要在链接后做一次小处理（把 `__TEXT.maxprot`
+    抬到 `rwx` 并 ad-hoc 重新签名，见 [issue #49](https://github.com/coolxv/cpp-stub/issues/49)）。
+    本仓库提供了构建系统集成助手，下游通常**不需要手动调用**任何脚本。
+    详见下文的 [macOS 集成说明](#macos-集成说明)。
 
 - 支持的硬件平台 :
   * [x] x86
@@ -72,6 +73,60 @@
 - -no-pie -fno-stack-protector
 - -fprofile-arcs
 - -ftest-coverage
+
+## macOS 集成说明
+
+macOS 下每个使用 cpp-stub 的可执行文件都需要在链接完成后做一次小处理：
+把 `__TEXT.maxprot` 抬到 `rwx`，并用 ad-hoc 重新签名。本仓库自带构建系统
+助手帮你自动做这件事；Linux / Windows 下这些助手是空操作。
+
+### CMake（零手动步骤）
+
+```cmake
+add_subdirectory(third_party/cpp-stub)
+add_executable(my_test test.cpp)
+target_link_libraries(my_test PRIVATE cpp-stub)
+```
+
+仓库根部的 `CMakeLists.txt` 会注册一个 deferred hook：在配置阶段结束时
+遍历所有 executable，对每个直接链接 `cpp-stub` 的目标自动挂 POST_BUILD
+步骤。只有当可执行文件通过中间静态库**间接**链接 cpp-stub 时，才需要
+显式调用：
+
+```cmake
+cpp_stub_enable(my_test)
+```
+
+### Makefile
+
+```make
+CPP_STUB_DIR := third_party/cpp-stub
+include $(CPP_STUB_DIR)/mk/cpp-stub.mk
+
+my_test: my_test.cpp
+	$(CXX) $(addprefix -I,$(CPP_STUB_INCLUDE)) ... -o $@ $<
+	@$(CPP_STUB_POSTLINK)
+```
+
+`$(CPP_STUB_POSTLINK)` 在 macOS 上展开为 enable-stub 命令，
+在 Linux/Windows 上展开为空操作 (`:`)，同一份 Makefile 跨平台可用。
+
+### Xcode / Bazel / 其它
+
+加一条 run-script / `genrule`，对每个可执行文件调一次：
+
+```bash
+third_party/cpp-stub/tool/macos_enable_stub.sh "$TARGET_BUILD_DIR/$EXECUTABLE_PATH"
+```
+
+### 为什么需要这一步
+
+参见 [issue #49](https://github.com/coolxv/cpp-stub/issues/49) 以及
+[src/stub.h](src/stub.h) 的 `__APPLE__` 分支：内核不允许
+`mprotect`/`mach_vm_protect` 把 `__TEXT` 的权限提升到 Mach-O 里
+`maxprot` 之上，而 Apple Silicon 还在页表层面强制 W^X。
+`tool/macos_enable_stub.sh` 负责把 `maxprot` 抬到 `rwx`，这样
+cpp-stub 运行时才能通过 `mach_vm_remap` 拿到 `__TEXT` 的可写别名。
 
 
 ## 代码覆盖率, linux g++使用方法

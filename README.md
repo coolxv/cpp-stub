@@ -10,11 +10,14 @@
 - Supported operating systems:
   * [x] Windows
   * [x] Linux
-  * [x] MacOS — both Intel (x86-64) and Apple Silicon (arm64). After building, run
-    `tool/macos_enable_stub.sh <binary>` on each test executable to lift the
-    `__TEXT` segment's `maxprot` to `rwx` and ad-hoc re-sign (required by
-    macOS's W^X enforcement; see [issue #49](https://github.com/coolxv/cpp-stub/issues/49)
-    and [test/Makefile.darwin.clang](test/Makefile.darwin.clang) for an example).
+  * [x] MacOS — both Intel (x86-64) and Apple Silicon (arm64). Because macOS
+    enforces W^X on `__TEXT` and caps `mprotect` at each segment's `maxprot`,
+    every binary that uses cpp-stub needs a tiny post-link adjustment
+    (lift `__TEXT.maxprot` to `rwx` and ad-hoc re-sign; see
+    [issue #49](https://github.com/coolxv/cpp-stub/issues/49)).
+    cpp-stub ships build-system helpers that do this automatically, so
+    downstream users normally do **not** have to call anything by hand.
+    See [the macOS integration section](#macos-integration) below.
 - Supported hardware platform: 
   * [x] x86
   * [x] x86-64
@@ -71,6 +74,64 @@
 - -no-pie -fno-stack-protector
 - -fprofile-arcs
 - -ftest-coverage
+
+## macOS integration
+
+macOS requires every binary that uses cpp-stub to have its `__TEXT`
+segment's `maxprot` lifted to `rwx` and be ad-hoc re-signed once, after
+link. The library ships helpers that wire this up for you; on Linux and
+Windows the same helpers do nothing.
+
+### CMake (zero manual steps)
+
+```cmake
+add_subdirectory(third_party/cpp-stub)
+add_executable(my_test test.cpp)
+target_link_libraries(my_test PRIVATE cpp-stub)
+```
+
+The root `CMakeLists.txt` installs a deferred hook that finds every
+executable that links `cpp-stub` and automatically attaches the
+post-build patch step on Apple platforms. For the rare case where an
+executable only links cpp-stub *transitively* through a static library,
+call it explicitly:
+
+```cmake
+cpp_stub_enable(my_test)
+```
+
+### Makefile
+
+```make
+CPP_STUB_DIR := third_party/cpp-stub
+include $(CPP_STUB_DIR)/mk/cpp-stub.mk
+
+my_test: my_test.cpp
+	$(CXX) $(addprefix -I,$(CPP_STUB_INCLUDE)) ... -o $@ $<
+	@$(CPP_STUB_POSTLINK)
+```
+
+`$(CPP_STUB_POSTLINK)` expands to the enable-stub command on macOS and
+to a no-op (`:`) on Linux/Windows, so the same rule works cross-platform.
+
+### Xcode / Bazel / other
+
+Add a run-script / `genrule` that invokes the helper once per built
+executable:
+
+```bash
+third_party/cpp-stub/tool/macos_enable_stub.sh "$TARGET_BUILD_DIR/$EXECUTABLE_PATH"
+```
+
+### Why this step exists
+
+See [issue #49](https://github.com/coolxv/cpp-stub/issues/49) and the
+`__APPLE__` branch of [src/stub.h](src/stub.h) for the full story: the
+kernel will not let `mprotect`/`mach_vm_protect` raise `__TEXT` above
+its Mach-O `maxprot`, and Apple Silicon further enforces W^X at the
+page-table level even when `maxprot=rwx`. `tool/macos_enable_stub.sh`
+raises `maxprot` so that cpp-stub can obtain a writable alias of
+`__TEXT` at runtime via `mach_vm_remap`.
 
 ## Code coverage statistics for linux g++
 ```
