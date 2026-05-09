@@ -10,6 +10,11 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #endif
+#if defined(__APPLE__)
+#include <mach/mach.h>
+#include <mach/mach_vm.h>
+#include <libkern/OSCacheControl.h>
+#endif
 //c
 #include <cstddef>
 #include <cstdint>
@@ -49,6 +54,24 @@
   #endif
 #endif
 
+#if defined(__APPLE__)
+// On Apple (especially Apple Silicon), a direct store instruction targeted
+// at an alias of a __TEXT page deadlocks the current thread when the store
+// opcode itself resides on the same physical page as the destination.
+// To dodge this, every write to the patch site is routed through libSystem's
+// memcpy via a volatile function pointer; that keeps the store opcodes on
+// libSystem's pages rather than on our own __TEXT page.
+static inline void __stub_apple_memcpy(void* dst, const void* src, std::size_t n)
+{
+    typedef void* (*__stub_memcpy_t)(void*, const void*, std::size_t);
+    volatile __stub_memcpy_t mc = (__stub_memcpy_t)&std::memcpy;
+    mc(dst, src, n);
+}
+#define STUB_WRITE_BYTES(dst, src, n) __stub_apple_memcpy((dst), (src), (n))
+#else
+#define STUB_WRITE_BYTES(dst, src, n) std::memcpy((dst), (src), (n))
+#endif
+
 #if defined(__aarch64__) || defined(_M_ARM64)
     #define CODESIZE 16U
     #define CODESIZE_MIN 16U
@@ -56,11 +79,23 @@
     // ldr x9, +8 
     // br x9 
     // addr 
+#if defined(__APPLE__)
+    #define REPLACE_FAR(t, fn, fn_stub)\
+        do {\
+            uint32_t __stub_buf[4];\
+            __stub_buf[0] = 0x58000040 | 9;\
+            __stub_buf[1] = 0xd61f0120 | (9 << 5);\
+            *(long long *)(&__stub_buf[2]) = (long long)(fn_stub);\
+            __stub_apple_memcpy((fn), __stub_buf, CODESIZE);\
+            CACHEFLUSH((char *)(fn), CODESIZE);\
+        } while(0)
+#else
     #define REPLACE_FAR(t, fn, fn_stub)\
         ((uint32_t*)fn)[0] = 0x58000040 | 9;\
         ((uint32_t*)fn)[1] = 0xd61f0120 | (9 << 5);\
         *(long long *)(fn + 8) = (long long )fn_stub;\
         CACHEFLUSH((char *)fn, CODESIZE);
+#endif
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__arm__) || defined(_M_ARM)
     #define CODESIZE 8U
@@ -392,31 +427,25 @@ public:
         for(iter=m_result.begin(); iter != m_result.end(); iter++)
         {
             pstub = iter->second;
-#ifdef _WIN32
-            DWORD lpflOldProtect;
-            if(0 != VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READWRITE, &lpflOldProtect))
-#else
-            if (0 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
-#endif       
+            WriteSession ws;
+            if (!begin_write(pstub->fn, ws))
             {
-
-                if(pstub->far_jmp)
-                {
-                    std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
-                }
-                else
-                {
-                    std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
-                }
-
-                CACHEFLUSH((char *)pstub->fn, CODESIZE);
-
-#ifdef _WIN32
-                VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect);
-#else
-                mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC);
-#endif     
+                iter->second = NULL;
+                delete pstub;
+                continue;
             }
+
+            if(pstub->far_jmp)
+            {
+                STUB_WRITE_BYTES(ws.write_addr, pstub->code_buf, CODESIZE_MAX);
+            }
+            else
+            {
+                STUB_WRITE_BYTES(ws.write_addr, pstub->code_buf, CODESIZE_MIN);
+            }
+
+            CACHEFLUSH((char *)pstub->fn, CODESIZE);
+            end_write(pstub->fn, ws);
 
             iter->second  = NULL;
             delete pstub;        
@@ -448,31 +477,33 @@ public:
             std::memcpy(pstub->code_buf, fn, CODESIZE_MIN);
         }
 
-#ifdef _WIN32
-        DWORD lpflOldProtect;
-        if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READWRITE, &lpflOldProtect))
-#else
-        if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
-#endif       
+        WriteSession ws;
+        if (!begin_write(pstub->fn, ws))
         {
+            delete pstub;
             throw("stub set memory protect to w+r+x faild");
         }
 
+        unsigned char * write_fn = ws.write_addr;
         if(pstub->far_jmp)
         {
-            REPLACE_FAR(this, fn, fn_stub);
+            REPLACE_FAR(this, write_fn, fn_stub);
         }
         else
         {
-            REPLACE_NEAR(this, fn, fn_stub);
+            REPLACE_NEAR(this, write_fn, fn_stub);
         }
 
-#ifdef _WIN32
-        if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect))
-#else
-        if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC))
-#endif     
+#if defined(__APPLE__)
+        // Also flush i-cache at the original executable VA (the alias shares
+        // the same physical page, but invalidating the original VA explicitly
+        // is a safety belt for all cache topologies).
+        sys_icache_invalidate(pstub->fn, CODESIZE);
+#endif
+
+        if (!end_write(pstub->fn, ws))
         {
+            delete pstub;
             throw("stub set memory protect to r+x failed");
         }
         m_result.insert(std::pair<unsigned char*,func_stub*>(fn,pstub));
@@ -493,34 +524,28 @@ public:
         }
         struct func_stub *pstub;
         pstub = iter->second;
-        
-#ifdef _WIN32
-        DWORD lpflOldProtect;
-        if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READWRITE, &lpflOldProtect))
-#else
-        if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
-#endif       
+
+        WriteSession ws;
+        if (!begin_write(pstub->fn, ws))
         {
             throw("stub reset memory protect to w+r+x faild");
         }
 
         if(pstub->far_jmp)
         {
-            std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MAX);
+            STUB_WRITE_BYTES(ws.write_addr, pstub->code_buf, CODESIZE_MAX);
         }
         else
         {
-            std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
+            STUB_WRITE_BYTES(ws.write_addr, pstub->code_buf, CODESIZE_MIN);
         }
 
         CACHEFLUSH((char *)pstub->fn, CODESIZE);
+#if defined(__APPLE__)
+        sys_icache_invalidate(pstub->fn, CODESIZE);
+#endif
 
-
-#ifdef _WIN32
-        if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect))
-#else
-        if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC))
-#endif     
+        if (!end_write(pstub->fn, ws))
         {
             throw("stub reset memory protect to r+x failed");
         }
@@ -530,6 +555,91 @@ public:
         return;
     }
 private:
+    struct WriteSession
+    {
+        unsigned char* write_addr;
+#if defined(__APPLE__)
+        mach_vm_address_t alias;
+        mach_vm_size_t region_size;
+#endif
+    };
+
+    bool begin_write(unsigned char* fn, WriteSession& ws)
+    {
+#if defined(__APPLE__)
+        // On Apple Silicon (and on hardened runtime Intel Macs) the __TEXT
+        // segment cannot be made writable via mprotect. Obtain a writable
+        // alias of the target page(s) via mach_vm_remap + VM_INHERIT_SHARE,
+        // then escalate the alias to PROT_READ|PROT_WRITE. The alias shares
+        // the same physical memory as the original executable mapping, so
+        // writes through the alias are visible at the original address.
+        //
+        // Prerequisite (one-time, per-binary): the __TEXT segment's maxprot
+        // must allow write. See tool/macos_enable_stub.sh which patches the
+        // Mach-O header and re-signs the binary ad-hoc.
+        long ps = m_pagesize;
+        mach_vm_address_t page_start = (mach_vm_address_t)(uintptr_t)fn & ~((mach_vm_address_t)ps - 1);
+        mach_vm_size_t offset = (mach_vm_size_t)((uintptr_t)fn - page_start);
+        mach_vm_size_t region_size = ((offset + (mach_vm_size_t)CODESIZE + ps - 1) / ps) * ps;
+        mach_vm_address_t alias = 0;
+        vm_prot_t cur_prot = 0;
+        vm_prot_t max_prot = 0;
+        kern_return_t kr = mach_vm_remap(mach_task_self(), &alias, region_size, 0,
+            VM_FLAGS_ANYWHERE, mach_task_self(), page_start, FALSE,
+            &cur_prot, &max_prot, VM_INHERIT_SHARE);
+        if (kr != KERN_SUCCESS)
+        {
+            return false;
+        }
+        kr = mach_vm_protect(mach_task_self(), alias, region_size, FALSE,
+            VM_PROT_READ | VM_PROT_WRITE);
+        if (kr != KERN_SUCCESS)
+        {
+            mach_vm_deallocate(mach_task_self(), alias, region_size);
+            return false;
+        }
+        ws.alias = alias;
+        ws.region_size = region_size;
+        ws.write_addr = (unsigned char*)(uintptr_t)(alias + offset);
+        return true;
+#elif defined(_WIN32)
+        DWORD lpflOldProtect;
+        if (0 == VirtualProtect(pageof(fn), m_pagesize * 2, PAGE_EXECUTE_READWRITE, &lpflOldProtect))
+        {
+            return false;
+        }
+        ws.write_addr = fn;
+        return true;
+#else
+        if (-1 == mprotect(pageof(fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
+        {
+            return false;
+        }
+        ws.write_addr = fn;
+        return true;
+#endif
+    }
+
+    bool end_write(unsigned char* fn, WriteSession& ws)
+    {
+#if defined(__APPLE__)
+        (void)fn;
+        if (ws.alias)
+        {
+            mach_vm_deallocate(mach_task_self(), ws.alias, ws.region_size);
+            ws.alias = 0;
+        }
+        return true;
+#elif defined(_WIN32)
+        (void)ws;
+        DWORD lpflOldProtect;
+        return 0 != VirtualProtect(pageof(fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect);
+#else
+        (void)ws;
+        return -1 != mprotect(pageof(fn), m_pagesize * 2, PROT_READ | PROT_EXEC);
+#endif
+    }
+
     void *pageof(unsigned char* addr)
     { 
 #ifdef _WIN32

@@ -22,10 +22,10 @@ jobs:
             compiler: gcc
           - os: ubuntu-latest
             compiler: clang
-#         - os: macos-latest
-#           compiler: clang
-#         - os: macos-14
-#           compiler: clang            
+          - os: macos-13
+            compiler: clang
+          - os: macos-latest
+            compiler: clang
     steps:
     - uses: actions/checkout@v4
 
@@ -70,50 +70,32 @@ jobs:
           echo "--- done RUNNING $f ---"
         done
       working-directory: ${{ github.workspace }}/test
-    - name: Build and run tests (Macos)
-      if: ${{ matrix.os == 'macos-latest' }}
+    - name: Build and run tests (macOS)
+      if: ${{ startsWith(matrix.os, 'macos') }}
       run: |
-        sysctl hw
-        make -f Makefile.linux64.clang
-        compiler=clang
-        for f in $(find . -type f -name "*.cpp"); do
-          if [[ -z "${f##*win.cpp}" ]]; then
-            continue
-          fi
-          
-          f=${f%.cpp}
-          
-          if [ ${compiler}="clang" ] && [[ $f == *virtual* ]]; then
-            continue
-          fi
-          
+        sysctl -n machdep.cpu.brand_string || true
+        uname -m
+        # Build + post-process (macos_enable_stub.sh is invoked automatically
+        # by the Makefile: it patches __TEXT maxprot to rwx and re-signs the
+        # binary ad-hoc so cpp-stub's Apple code path can create a writable
+        # alias of __TEXT at runtime).
+        make -f Makefile.darwin.clang
+        for f in $(find . -maxdepth 1 -type f -perm -u+x ! -name "Makefile*" ! -name "*.cpp" ! -name "*.md"); do
           echo "--- RUNNING $f ---"
-             printf '\x07' | dd of=${f} bs=1 seek=160 count=1 conv=notrunc
-            ${f}
+          "$f"
           echo "--- done RUNNING $f ---"
         done
       working-directory: ${{ github.workspace }}/test
-    - name: Build and run tests (Macos M1)
-      if: ${{ matrix.os == 'macos-14' }}
+      shell: bash
+
+    - name: CMake integration smoke test (macOS)
+      if: ${{ startsWith(matrix.os, 'macos') }}
       run: |
-        sysctl hw
-        make -f Makefile.linux64.clang
-        compiler=clang
-        for f in $(find . -type f -name "*.cpp"); do
-          if [[ -z "${f##*win.cpp}" ]]; then
-            continue
-          fi
-          
-          f=${f%.cpp}
-          
-          if [ ${compiler}="clang" ] && [[ $f == *virtual* ]]; then
-            continue
-          fi
-          
-          echo "--- RUNNING $f ---"
-             printf '\x07' | dd of=${f} bs=1 seek=160 count=1 conv=notrunc
-            ${f}
-          echo "--- done RUNNING $f ---"
-        done
-      working-directory: ${{ github.workspace }}/test
+        # Verifies that downstream projects only need
+        #   target_link_libraries(my_test PRIVATE cpp-stub)
+        # and no manual post-build step — the root CMakeLists.txt
+        # defers and attaches macos_enable_stub.sh automatically.
+        cmake -S example/cmake_smoke -B example/cmake_smoke/build
+        cmake --build example/cmake_smoke/build
+        ./example/cmake_smoke/build/cmake_smoke
       shell: bash

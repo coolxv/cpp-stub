@@ -1,0 +1,32 @@
+#    Darwin (macOS) makefile - works on both Apple Silicon (arm64) and Intel (x86_64).
+#
+#    macOS refuses to let mprotect raise __TEXT above r-x, and on Apple Silicon
+#    the kernel additionally enforces W^X at the page-table level. cpp-stub
+#    copes with the second restriction in code (see src/stub.h, the __APPLE__
+#    branch), but we still need to lift __TEXT's maxprot to rwx in every built
+#    binary so the runtime patcher is allowed to create a writable alias of
+#    the text segment. That is done by ../tool/macos_enable_stub.sh, wired in
+#    here through the shared cpp-stub.mk helper (which also re-signs ad-hoc).
+#
+#    Tests that rely on Linux/Windows-specific behaviour (ptrace / PE headers
+#    / glibc internals / ELF-only tricks) are excluded.
+
+include ../mk/cpp-stub.mk
+
+SOURCE = $(filter-out %win.cpp %_linux.cpp test_addr_any_linux.cpp, $(wildcard *.cpp))
+SOURCE := $(filter-out test_virtual_function_linux.cpp test_virtual_overload_function_linux.cpp, $(SOURCE))
+TARGETS = $(patsubst %.cpp, %, $(SOURCE))
+INC = $(addprefix -I,$(CPP_STUB_INCLUDE))
+LIB = -lm
+CC = clang++
+CFLAGS = -std=c++11 -g -fno-stack-protector -Wall -Wno-unused-function -Wno-unused-variable -Wno-unused-private-field
+
+all: clean $(TARGETS)
+
+$(TARGETS):%:%.cpp
+	$(CC) $< $(CFLAGS) $(INC) $(LIB) -o $@
+	@$(CPP_STUB_POSTLINK)
+
+.PHONY: clean all
+clean:
+	-rm -rf $(TARGETS)
