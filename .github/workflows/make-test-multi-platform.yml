@@ -35,7 +35,7 @@ jobs:
     - name: Build and run tests (Windows)
       if: ${{ matrix.os == 'windows-latest' }}
       run: |
-        wmic cpu
+        Get-CimInstance Win32_Processor | Select-Object -Property Name, NumberOfCores, NumberOfLogicalProcessors
         nmake -f Makefile.win64
         
         Get-ChildItem "." -Filter '*.exe' | 
